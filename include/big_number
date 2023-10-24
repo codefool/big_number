@@ -13,12 +13,12 @@ class big_number {
 private:
     bool                         s;  // true negative, false positive
     short                        d;  // significant digits
-    std::shared_ptr<signed char> b;
+    std::unique_ptr<signed char[]> b;
 public:
     big_number() 
     : s(false), d(0)
     {
-        b = std::make_shared<signed char>(B_SIZE);
+        b = std::make_unique<signed char[]>(B_SIZE);
         std::memset(b.get(), 0x00, B_SIZE);
     }
 
