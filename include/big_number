@@ -1,0 +1,101 @@
+#pragma once
+
+#include <iostream>
+#include <cstring>
+#include <cctype>
+#include <memory>
+
+#include "buildinfo.h"
+
+const size_t B_SIZE = 2048;
+
+class big_number {
+private:
+    bool                         s;  // true negative, false positive
+    short                        d;  // significant digits
+    std::shared_ptr<signed char> b;
+public:
+    big_number() 
+    : s(false), d(0)
+    {
+        b = std::make_shared<signed char>(B_SIZE);
+        std::memset(b.get(), 0x00, B_SIZE);
+    }
+
+    // accept a string of digits in canonical form
+    // e.g. 1234567890
+    // - leading zeros are ignored (removed)
+    // - the remaining digits are the significant digit count
+    // - the number is then loaded into the buffer LSD first
+    big_number(std::string num) 
+    : big_number()
+    {
+        auto itr = num.begin();
+        for( ; itr != num.end() && (std::isspace(*itr) || *itr == '0'); ++itr)
+            ;
+        if ( itr == num.end() )
+            return;
+        auto p = b.get();
+        while ( itr != num.end() ) {
+            *p++ = *itr++ - '0';
+            d++;
+        }
+        auto q = b.get();
+        while( p-- > q ) {
+            auto t = *p;
+            *p   = *q;
+            *q++ = t;
+        }
+    }
+
+    const size_t size() const {
+        return d;
+    }       
+
+    const signed char *get() const {
+        return b.get();
+    }
+
+    // answer -1 if lhs < rhs, 0 if lhs == rhs, and 1 if lhs > rhs
+    int compare(const big_number& rhs) {
+        // lhs has more signifant digits, or lhs positive and rhs negative
+        if ( d > rhs.d || (!s && rhs.s)) return 1;
+        // rhs has more signifant digits, or lhs negative and rhs positive
+        if ( d < rhs.d || (s && !rhs.s)) return -1;
+        // lhs and rhs have same sign and number of signifiant digits
+        short digit = d - 1;
+        int diff = 0;
+        const signed char *l = get() + digit;
+        const signed char *r = rhs.get() + digit;
+        for( ; digit--; l--, r-- ) {
+            if ( *l != *r ) {
+                diff = *l - *r;
+                if ( s )        // if negative
+                    diff *= -1; // flip sign
+                return diff;
+            }
+        }
+        return 0;
+    }
+
+    bool operator==(const big_number& rhs) {
+        return compare(rhs) == 0;
+    }
+
+    bool operator<(const big_number& rhs) {
+        return compare(rhs) < 0;
+    }
+
+    bool operator<=(const big_number& rhs) {
+        return compare(rhs) <= 0;
+    }
+
+    bool operator>(const big_number& rhs) {
+        return compare(rhs) > 0;
+    }
+
+    bool operator>=(const big_number& rhs) {
+        return compare(rhs) >= 0;
+    }
+
+};
