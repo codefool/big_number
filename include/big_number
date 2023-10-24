@@ -35,10 +35,20 @@ public:
             ;
         if ( itr == num.end() )
             return;
+        // check for leading sign - if first char is '-' or '+' then set s accordingly
+        bool signFound = false;
+        if (*itr == '-' || *itr == '+') {
+            s = *itr++ == '-';
+            signFound = true;
+        }
         auto p = b.get();
-        while ( itr != num.end() ) {
+        while ( itr != num.end() && std::isdigit(*itr)) {
             *p++ = *itr++ - '0';
             d++;
+        }
+        // check for trailing sign - if next char is '-' or '+' then set s accordingly
+        if (itr != num.end() && !signFound && (*itr == '-' || *itr == '+')) {
+            s = *itr == '-';
         }
         auto q = b.get();
         while( p-- > q ) {
@@ -57,19 +67,17 @@ public:
     }
 
     // answer -1 if lhs < rhs, 0 if lhs == rhs, and 1 if lhs > rhs
-    int compare(const big_number& rhs) {
+    int compare(const big_number& rhs) const {
         // lhs has more signifant digits, or lhs positive and rhs negative
         if ( d > rhs.d || (!s && rhs.s)) return 1;
         // rhs has more signifant digits, or lhs negative and rhs positive
         if ( d < rhs.d || (s && !rhs.s)) return -1;
         // lhs and rhs have same sign and number of signifiant digits
-        short digit = d - 1;
-        int diff = 0;
-        const signed char *l = get() + digit;
-        const signed char *r = rhs.get() + digit;
-        for( ; digit--; l--, r-- ) {
+        const signed char *l = get() + d - 1;
+        const signed char *r = rhs.get() + d - 1;
+        for( auto digit = d; digit; l--, r--, digit-- ) {
             if ( *l != *r ) {
-                diff = *l - *r;
+                int diff = *l - *r;
                 if ( s )        // if negative
                     diff *= -1; // flip sign
                 return diff;
@@ -78,23 +86,23 @@ public:
         return 0;
     }
 
-    bool operator==(const big_number& rhs) {
+    bool operator==(const big_number& rhs) const {
         return compare(rhs) == 0;
     }
 
-    bool operator<(const big_number& rhs) {
+    bool operator<(const big_number& rhs) const {
         return compare(rhs) < 0;
     }
 
-    bool operator<=(const big_number& rhs) {
+    bool operator<=(const big_number& rhs) const {
         return compare(rhs) <= 0;
     }
 
-    bool operator>(const big_number& rhs) {
+    bool operator>(const big_number& rhs) const {
         return compare(rhs) > 0;
     }
 
-    bool operator>=(const big_number& rhs) {
+    bool operator>=(const big_number& rhs) const {
         return compare(rhs) >= 0;
     }
 
