@@ -7,19 +7,30 @@
 
 #include "buildinfo.h"
 
-const size_t B_SIZE = 2048;
-
 class big_number {
+public:
+    const size_t B_SIZE = 2048;
+    typedef signed char digit_t;
+
 private:
-    bool                         s;  // true negative, false positive
-    short                        d;  // significant digits
-    std::unique_ptr<signed char[]> b;
+    bool                           s;  // true negative, false positive
+    short                          d;  // significant digits
+    std::unique_ptr<digit_t[]> b;
+
 public:
     big_number() 
     : s(false), d(0)
     {
-        b = std::make_unique<signed char[]>(B_SIZE);
+        b = std::make_unique<digit_t[]>(B_SIZE);
         std::memset(b.get(), 0x00, B_SIZE);
+    }
+
+    big_number(const big_number& other)
+    : big_number()
+    {
+        std::memcpy((void *)get(), (const void *)other.c_get(), other.size());
+        d = other.d;
+        s = other.s;
     }
 
     // accept a string of digits in canonical form
@@ -58,11 +69,15 @@ public:
         }
     }
 
+    int sign() const {
+        return s ? -1 : 1;
+    }
+
     const size_t size() const {
         return d;
     }       
 
-    const signed char *get() const {
+    const digit_t *c_get() const {
         return b.get();
     }
 
@@ -73,8 +88,8 @@ public:
         // rhs has more signifant digits, or lhs negative and rhs positive
         if ( d < rhs.d || (s && !rhs.s)) return -1;
         // lhs and rhs have same sign and number of signifiant digits
-        const signed char *l = get() + d - 1;
-        const signed char *r = rhs.get() + d - 1;
+        const digit_t *l = c_get() + d - 1;
+        const digit_t *r = rhs.c_get() + d - 1;
         for( auto digit = d; digit; l--, r--, digit-- ) {
             if ( *l != *r ) {
                 int diff = *l - *r;
@@ -106,4 +121,20 @@ public:
         return compare(rhs) >= 0;
     }
 
+    digit_t& operator[](size_t index) {
+        return b[index];
+    }
+
+    big_number operator+(const big_number& rhs) const;
+
+    big_number operator-(const big_number& rhs) const;
+
+    big_number nines_complement() const;
+
+    friend std::ostream& operator<<(std::ostream& os, big_number& obj);
+
+private:
+    digit_t *get() {
+        return b.get();
+    }    
 };

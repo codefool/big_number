@@ -7,7 +7,7 @@ INC_DIR := ./include
 SRC_DIR := ./src
 OBJ_DIR := ./obj
 LIB_DIR := ./lib
-# LIB_NAME := $(LIB_DIR)/libroece
+LIB_NAME := $(LIB_DIR)/libbignum
 # LIB_INC := /usr/local/libcf/lib/libcf
 
 SRC := $(wildcard $(SRC_DIR)/*.cpp)
@@ -23,8 +23,8 @@ AFLAGS := rvs
 # garth : garth.cpp garth.h $(HDR) $(LIB_NAME)
 # 	$(CC) $(CFLAGS) garth.cpp -L/usr/lib/x86_64-linux-gnu -L/usr/local/libcf/lib/libcf $(LIB_NAME) -o $@
 
-# $(LIB_NAME) : $(OBJ)
-# 	$(ARC) $(AFLAGS) $@ $(OBJ)
+$(LIB_NAME) : $(OBJ)
+	$(ARC) $(AFLAGS) $@ $(OBJ)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp $(HDR)
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -35,7 +35,7 @@ build-ver:
 clean:
 	-rm $(OBJ_DIR)/*.o $(LIB_NAME)
 
-.PHONY: main build-ver
+.PHONY: build-ver
 
-main: main.cpp build-ver $(HDR)
-	$(CC) $(CFLAGS) main.cpp -I. -L/usr/lib/x86_64-linux-gnu $(OBJ) -o main
+main: main.cpp build-ver $(HDR) $(LIB_NAME)
+	$(CC) $(CFLAGS) main.cpp -I. -L/usr/lib/x86_64-linux-gnu $(OBJ) $(LIB_NAME) -o main
