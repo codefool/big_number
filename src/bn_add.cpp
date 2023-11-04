@@ -5,6 +5,16 @@
 // this does basic columnar arithmetic
 // 
 big_number big_number::operator+(const big_number& rhs) const {
+    if ( rhs.sign() < 0 ) {
+        return *this - rhs.negate();
+    }
+    if (sign() < 0) {
+        return rhs - negate();
+    }
+    return add(rhs);
+}
+
+big_number big_number::add(const big_number& rhs) const {
     big_number sum;
     digit_t carry(0);
     digit_t digit;
@@ -15,37 +25,24 @@ big_number big_number::operator+(const big_number& rhs) const {
     const digit_t *b = rhs.c_get();
     // take a digit from each addend, add then together, then
     // sum = d
-    size_t len = (size() > rhs.size()) ? size() : rhs.size();
+    size_t len = std::max(size(), rhs.size());
     for ( size_t idx(0); idx < len; ++idx ) {
         l = (idx < size()) ? *a++ : 0;
         r = (idx < rhs.size()) ? *b++ : 0;
         digit = l + r + carry;
         *s++ = digit % 10;
-        sum.d++;
+        sum.m++;
         carry = digit / 10;
     }
     if (carry) {
         *s++ = carry;
-        sum.d++;
+        sum.m++;
     }
     return sum;
 }
 
-// calculate and return the nines complement
-// The nines' complement of a decimal digit is the number that must
-// be added to it to produce 9, the nines' complement of 3 is 6.
-//
-big_number big_number::nines_complement() const {
-    big_number cmp(*this);    
-    for ( int idx = 0; idx < B_SIZE; ++idx) {
-        cmp[idx] = 9 - cmp[idx];
+void big_number::append(digit_t digit) {
+    if ( m < B_SIZE ) {
+        b[m++] = digit;
     }
-    return cmp;
-}
-
-// subtract two positive numbers using complement method
-big_number big_number::operator-(const big_number& rhs) const {
-    big_number cmp = nines_complement();
-    big_number res = cmp + rhs;
-    return res.nines_complement();
 }

@@ -1,17 +1,27 @@
 #include "big_number"
 
 int main() {
-    big_number a("1234567890");
-    big_number b("123456789");
+    big_number n0("1234567890");
+    big_number n1("123456789");
+    big_number n2("-123456789");
 
-    std::cout << (a < b) << std::endl;
-    std::cout << (a > b) << std::endl;
-    std::cout << (a == b) << std::endl;
 
-    auto c = a + b;
-    auto d = a - b;
-
-    std::cout << d << std::endl;
+    auto c = n0 + n1;
+    std::cout << c << std::endl;
+    c = n0 - n1;
+    std::cout << c << std::endl;
+    c = n0 + n2;
+    std::cout << c << std::endl;
+    c = n2 + n1;
+    std::cout << c << std::endl;
+    c = big_number("-12345") - big_number::ONE;
+    std::cout << c << std::endl;
+    c = big_number("-12345") - big_number::ONE.negate();
+    std::cout << c << std::endl;
+    c = big_number("-1") + big_number("-10");
+    std::cout << c << std::endl;
+    c = big_number("-1") - big_number("-10");
+    std::cout << c << std::endl;
 
 
 

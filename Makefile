@@ -16,7 +16,7 @@ HDR := $(wildcard $(INC_DIR)/*.h)
 
 CC := g++
 #CFLAGS := -g -std=c++2a -I$(INC_DIR) -I/usr/local/libcf/include
-CFLAGS := -g -std=c++2a -I$(INC_DIR)
+CFLAGS := -g -std=c++23 -I$(INC_DIR)
 ARC := ar
 AFLAGS := rvs
 
