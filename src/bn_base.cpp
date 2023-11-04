@@ -1,6 +1,7 @@
 #include "big_number"
 
 big_number big_number::ONE("1");
+big_number big_number::ZERO("0");
 
 big_number::big_number() 
 : s(false), 
@@ -13,7 +14,7 @@ big_number::big_number()
 big_number::big_number(const big_number& other)
 : big_number()
 {
-    std::memcpy((void *)get(), (const void *)other.c_get(), other.size());
+    std::memcpy((void *)get(), (const void *)other.c_get(), other.magn());
     m = other.m;
     s = other.s;
 }
@@ -29,8 +30,12 @@ big_number::big_number(std::string num)
     auto itr = num.begin();
     for( ; itr != num.end() && (std::isspace(*itr) || *itr == '0'); ++itr)
         ;
-    if ( itr == num.end() )
+    if ( itr == num.end() ) {
+        // value is zero
+        get()[0] == 0;
+        m++;
         return;
+    }
     // check for leading sign - if first char is '-' or '+' then set s accordingly
     bool signFound = false;
     if (*itr == '-' || *itr == '+') {
@@ -56,13 +61,13 @@ big_number::big_number(std::string num)
 
 int big_number::compare(const big_number& rhs) const {
     // lhs has more signifant digits, or lhs positive and rhs negative
-    if ( size() > rhs.size() || (sign() > rhs.sign())) return 1;
+    if ( magn() > rhs.magn() || (magn() > rhs.magn())) return 1;
     // rhs has more signifant digits, or lhs negative and rhs positive
-    if ( size() < rhs.size() || (sign() < rhs.sign())) return -1;
+    if ( magn() < rhs.magn() || (magn() < rhs.magn())) return -1;
     // lhs and rhs have same sign and number of signifiant digits
-    const digit_t *l = c_get() + size() - 1;
-    const digit_t *r = rhs.c_get() + size() - 1;
-    for( auto digit = size(); digit; l--, r--, digit-- ) {
+    const digit_t *l = c_get() + magn() - 1;
+    const digit_t *r = rhs.c_get() + magn() - 1;
+    for( auto digit = magn(); digit; l--, r--, digit-- ) {
         if ( *l != *r ) {
             int diff = (*l - *r) * sign();
             return diff;
@@ -73,7 +78,7 @@ int big_number::compare(const big_number& rhs) const {
 
 big_number& big_number::strip_leading(digit_t dig) {
     auto front = get();
-    auto end   = front + size() - 1;
+    auto end   = front + magn() - 1;
     while ( end > front && dig == *end-- ) {
         m--;
     }

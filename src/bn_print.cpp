@@ -4,7 +4,7 @@ std::ostream& operator<<(std::ostream& os, big_number& obj) {
     if (obj.sign() < 0 ) {
         os << '-';
     }
-    size_t idx = obj.size();
+    size_t idx = obj.magn();
     while ( idx ) {
         big_number::digit_t ch = obj[--idx];
         os << (char)('0' + ch);

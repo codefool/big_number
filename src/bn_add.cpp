@@ -5,13 +5,19 @@
 // this does basic columnar arithmetic
 // 
 big_number big_number::operator+(const big_number& rhs) const {
-    if ( rhs.sign() < 0 ) {
-        return *this - rhs.negate();
+    // a + -b === a - b
+    if ( rhs.is_negative() ) {
+        return *this - rhs.abs();
     }
-    if (sign() < 0) {
-        return rhs - negate();
+    if ( is_negative() ) {
+        return rhs - abs();
     }
     return add(rhs);
+}
+
+big_number& big_number::operator+=(const big_number& rhs) {
+    *this = *this + rhs;
+    return *this;
 }
 
 big_number big_number::add(const big_number& rhs) const {
@@ -25,10 +31,10 @@ big_number big_number::add(const big_number& rhs) const {
     const digit_t *b = rhs.c_get();
     // take a digit from each addend, add then together, then
     // sum = d
-    size_t len = std::max(size(), rhs.size());
+    size_t len = std::max(magn(), rhs.magn());
     for ( size_t idx(0); idx < len; ++idx ) {
-        l = (idx < size()) ? *a++ : 0;
-        r = (idx < rhs.size()) ? *b++ : 0;
+        l = (idx < magn()) ? *a++ : 0;
+        r = (idx < rhs.magn()) ? *b++ : 0;
         digit = l + r + carry;
         *s++ = digit % 10;
         sum.m++;

@@ -28,6 +28,12 @@ public:
         return s ? -1 : 1;
     }
 
+    big_number abs() const {
+        big_number ret(*this);
+        ret.s = false;
+        return ret;
+    }
+
     big_number negate() const {
         auto ret(*this);
         ret.s = !s;
@@ -42,7 +48,7 @@ public:
         return !s;
     }
 
-    inline const size_t size() const {
+    inline const size_t magn() const {
         return m;
     }       
 
@@ -53,39 +59,44 @@ public:
     // answer -1 if lhs < rhs, 0 if lhs == rhs, and 1 if lhs > rhs
     int compare(const big_number& rhs) const;
 
-    bool operator==(const big_number& rhs) const {
+    inline bool operator==(const big_number& rhs) const {
         return compare(rhs) == 0;
     }
 
-    bool operator<(const big_number& rhs) const {
+    inline bool operator<(const big_number& rhs) const {
         return compare(rhs) < 0;
     }
 
-    bool operator<=(const big_number& rhs) const {
+    inline bool operator<=(const big_number& rhs) const {
         return compare(rhs) <= 0;
     }
 
-    bool operator>(const big_number& rhs) const {
+    inline bool operator>(const big_number& rhs) const {
         return compare(rhs) > 0;
     }
 
-    bool operator>=(const big_number& rhs) const {
+    inline bool operator>=(const big_number& rhs) const {
         return compare(rhs) >= 0;
     }
 
-    digit_t& operator[](size_t index) {
+    inline digit_t& operator[](size_t index) {
         return b[index];
     }
 
     big_number operator+(const big_number& rhs) const;
+    big_number& operator+=(const big_number& rhs);
     big_number add(const big_number& rhs) const;
 
     big_number operator-(const big_number& rhs) const;
+    big_number& operator-=(const big_number& rhs);
     big_number sub_method_one(const big_number&rhs) const;
     big_number sub_method_two(const big_number& rhs) const;
     big_number sub_method_diff_magn(const big_number& rhs) const;
 
-    big_number nines_complement(size_t len) const;
+    big_number nines_complement(const size_t len) const;
+
+    big_number operator*(const big_number& rhs) const;
+    big_number& operator*=(const big_number&rhs);
 
     big_number& strip_leading(digit_t dig = 0);
 
@@ -99,4 +110,5 @@ private:
     }
 public:
     static big_number ONE;
+    static big_number ZERO;
 };

@@ -1,29 +1,28 @@
 #include "big_number"
 
-int main() {
-    big_number n0("1234567890");
-    big_number n1("123456789");
-    big_number n2("-123456789");
+int main(int argc, char **argv) {
+    if ( argc < 3 ) {
+        std::cout << "main lhs op rhs" << std::endl;
+        exit(1);
+    }
 
+    big_number lhs(argv[1]);
+    char *op (argv[2]);
+    big_number rhs(argv[3]);
+    big_number ans;
 
-    auto c = n0 + n1;
-    std::cout << c << std::endl;
-    c = n0 - n1;
-    std::cout << c << std::endl;
-    c = n0 + n2;
-    std::cout << c << std::endl;
-    c = n2 + n1;
-    std::cout << c << std::endl;
-    c = big_number("-12345") - big_number::ONE;
-    std::cout << c << std::endl;
-    c = big_number("-12345") - big_number::ONE.negate();
-    std::cout << c << std::endl;
-    c = big_number("-1") + big_number("-10");
-    std::cout << c << std::endl;
-    c = big_number("-1") - big_number("-10");
-    std::cout << c << std::endl;
+    switch( *op ) {
+        case '+': ans = lhs + rhs; break;   // addition
+        case '-': ans = lhs - rhs; break;   // subtraction
+        case '*': ans = lhs * rhs; break;   // multiplication
+        case '/':                                   // int division
+        case '^':                                   // exponent
+        case '%':                                   // modulus
+            std::cerr << "unsupported operator '" << *op << "'" << std::endl;
+            exit(2);
+    }
 
-
+    std::cout << ans << std::endl;
 
     return 0;
 }
