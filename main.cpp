@@ -16,9 +16,9 @@ int main(int argc, char **argv) {
         case '-': ans = lhs - rhs; break;   // subtraction
         case 'x':                           // multiplication
         case '*': ans = lhs * rhs; break;   // multiplication
-        case '/':                           // int division
-        case '^':                           // exponent
-        case '%':                           // modulus
+        case '/': ans = lhs / rhs; break;   // int division
+        case '%': ans = lhs % rhs; break;   // modulus
+        case '^': ans = lhs ^ rhs; break;   // exponent
             std::cerr << "unsupported operator '" << *op << "'" << std::endl;
             exit(2);
     }

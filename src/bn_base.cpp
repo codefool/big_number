@@ -19,6 +19,26 @@ big_number::big_number(const big_number& other)
     s = other.s;
 }
 
+void big_number::operator=(const int64_t val) {
+    if ( val == 0 ) {
+        m = 0;
+        s = POS;
+        return;
+    } 
+    int64_t wrk = val;
+    if ( wrk < 0 ) {
+        s = NEG;
+        wrk = -wrk;
+    }
+    while ( wrk ) {
+        append( wrk / 10 );
+        wrk %= 10;
+        m++;
+    }
+    reverse();
+}
+
+
 // accept a string of digits in canonical form
 // e.g. 1234567890
 // - leading zeros are ignored (removed)
@@ -83,4 +103,51 @@ big_number& big_number::strip_leading(digit_t dig) {
         m--;
     }
     return *this;
+}
+
+big_number& big_number::operator++() {
+    *this += ONE;
+    return *this;
+}
+
+big_number big_number::operator++(int) {
+    auto ret = *this;
+    ++(*this);
+    return ret;
+}
+
+big_number& big_number::operator--() {
+    *this -= ONE;
+    return *this;
+}
+
+big_number big_number::operator--(int) {
+    auto ret = *this;
+    --(*this);
+    return ret;
+}
+
+// append digit to the end of the number (MSD)
+void big_number::append(const digit_t digit) {
+    if ( m < B_SIZE ) {
+        b[m++] = digit;
+    }
+}
+
+// prepend digit to the beginning of the number (LSD)
+void big_number::prepend(const digit_t digit) {
+    if ( m < B_SIZE ) {
+        std::memcpy(get()+1, get(), m++);
+        b[0] = digit;
+    }
+}
+
+void big_number::reverse() {
+    auto *p = get() + m - 1;
+    auto q = get();
+    while( p > q ) {
+        auto t = *p;
+        *p-- = *q;
+        *q++ = t;
+    }
 }

@@ -46,9 +46,3 @@ big_number big_number::add(const big_number& rhs) const {
     }
     return sum;
 }
-
-void big_number::append(digit_t digit) {
-    if ( m < B_SIZE ) {
-        b[m++] = digit;
-    }
-}

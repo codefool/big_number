@@ -28,6 +28,10 @@ public:
     big_number(const big_number& other);
     big_number(std::string num);
 
+    bool is_zero() {
+        return *this == ZERO;
+    }
+
     inline int sign() const {
         return s ? -1 : 1;
     }
@@ -64,6 +68,10 @@ public:
         return b.get();
     }
 
+    inline const digit_t *c_get_msd() const {
+        return b.get() + m - 1;
+    }
+
     // answer -1 if lhs < rhs, 0 if lhs == rhs, and 1 if lhs > rhs
     int compare(const big_number& rhs) const;
 
@@ -91,29 +99,46 @@ public:
         return b[index];
     }
 
+    void operator=(const int64_t val);
+
+    big_number& operator++();
+    big_number operator++(int);
+    big_number& operator--();
+    big_number operator--(int);
+
     big_number operator+(const big_number& rhs) const;
     big_number& operator+=(const big_number& rhs);
-    big_number add(const big_number& rhs) const;
 
     big_number operator-(const big_number& rhs) const;
     big_number& operator-=(const big_number& rhs);
-    big_number sub_method_one(const big_number&rhs) const;
-    big_number sub_method_two(const big_number& rhs) const;
-    big_number sub_method_diff_magn(const big_number& rhs) const;
-
-    big_number nines_complement(const size_t len) const;
 
     big_number operator*(const big_number& rhs) const;
     big_number& operator*=(const big_number&rhs);
+    big_number operator^(const big_number& rhs) const;
+    big_number& operator^=(const big_number&rhs);
+
+    big_number operator%(const big_number& rhs) const;
+    big_number& operator%=(const big_number& rhs);
+    big_number operator/(const big_number& rhs) const;
+    big_number& operator/=(const big_number& rhs);
+
+    big_number add(const big_number& rhs) const;
+    big_number sub_method_one(const big_number&rhs) const;
+    big_number sub_method_two(const big_number& rhs) const;
+    big_number sub_method_diff_magn(const big_number& rhs) const;
+    big_number nines_complement(const size_t len) const;
+    big_number int_division(const big_number& rhs, big_number& rem) const;
 
     big_number& strip_leading(digit_t dig = 0);
 
     friend std::ostream& operator<<(std::ostream& os, big_number& obj);
 
 private:
-    void append(digit_t digit);
+    void append(const digit_t digit);
+    void prepend(const digit_t digit);
+    void reverse();
 
-    digit_t *get() {
+    inline digit_t *get() {
         return b.get();
     }
 public:

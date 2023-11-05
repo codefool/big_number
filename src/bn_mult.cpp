@@ -44,3 +44,19 @@ big_number& big_number::operator*=(const big_number&rhs) {
     *this = *this * rhs;
     return *this;
 }
+
+big_number big_number::operator^(const big_number& rhs) const {
+    big_number prod(*this);
+    big_number exp(rhs);
+    while ( --exp > ZERO ) {
+        prod *= *this;
+    }
+    return prod;
+}
+
+big_number& big_number::operator^=(const big_number&rhs) {
+    *this = *this ^ rhs;
+    return *this;
+}
+
+
