@@ -14,10 +14,11 @@ int main(int argc, char **argv) {
     switch( *op ) {
         case '+': ans = lhs + rhs; break;   // addition
         case '-': ans = lhs - rhs; break;   // subtraction
+        case 'x':                           // multiplication
         case '*': ans = lhs * rhs; break;   // multiplication
-        case '/':                                   // int division
-        case '^':                                   // exponent
-        case '%':                                   // modulus
+        case '/':                           // int division
+        case '^':                           // exponent
+        case '%':                           // modulus
             std::cerr << "unsupported operator '" << *op << "'" << std::endl;
             exit(2);
     }

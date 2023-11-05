@@ -9,15 +9,19 @@
 
 class big_number {
 public:
+    enum sign_t : bool {
+        POS = false,
+        NEG = true
+    };
     static const size_t B_SIZE = 2048;
     typedef signed char digit_t;
     typedef digit_t buff_t[B_SIZE];
+    typedef size_t      magnitude_t;
 
 private:
-    bool                    s;  // true negative, false positive
-    short                   m;  // maginitude
+    sign_t                  s;  // true negative, false positive
+    magnitude_t             m;  // maginitude
     std::shared_ptr<buff_t> b;
-    // digit_t b[B_SIZE];
 
 public:
     big_number();
@@ -30,14 +34,18 @@ public:
 
     big_number abs() const {
         big_number ret(*this);
-        ret.s = false;
+        ret.s = POS;
         return ret;
     }
 
     big_number negate() const {
         auto ret(*this);
-        ret.s = !s;
+        ret.s = (sign_t)(!s);
         return ret;
+    }
+
+    void set_sign(sign_t t) {
+        s = t;
     }
 
     bool is_negative() const {

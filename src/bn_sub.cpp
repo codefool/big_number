@@ -23,7 +23,7 @@ big_number big_number::operator-(const big_number& rhs) const {
         // sign magic - if magn() < rhs.magn()
         // then the sign of the result is inverse of lhs
         if ( magn() < rhs.magn() ) {
-            res.s = !is_negative();
+            res.s = (sign_t)is_positive();
         }
         return res;
     }

@@ -4,7 +4,7 @@ big_number big_number::ONE("1");
 big_number big_number::ZERO("0");
 
 big_number::big_number() 
-: s(false), 
+: s(POS), 
   m(0),
   b(std::make_shared<buff_t>())
 {
@@ -39,7 +39,7 @@ big_number::big_number(std::string num)
     // check for leading sign - if first char is '-' or '+' then set s accordingly
     bool signFound = false;
     if (*itr == '-' || *itr == '+') {
-        s = *itr++ == '-';
+        s = (sign_t)(*itr++ == '-');
         signFound = true;
     }
     auto p = get();
@@ -49,7 +49,7 @@ big_number::big_number(std::string num)
     }
     // check for trailing sign - if next char is '-' or '+' then set s accordingly
     if (itr != num.end() && !signFound && (*itr == '-' || *itr == '+')) {
-        s = *itr == '-';
+        s = (sign_t)(*itr == '-');
     }
     auto q = get();
     while( p-- > q ) {

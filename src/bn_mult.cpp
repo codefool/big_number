@@ -29,12 +29,18 @@ big_number big_number::operator*(const big_number& rhs) const {
             carry /= 10;
             i.m++;
         }
-        std::cout << i << std::endl;
         prod += i;
+        std::cout << i << ' ' << prod << std::endl;
+    }
+    // sign correction - if either factor is negative, but not both
+    // then product is negative.
+    if ( ( is_negative() || rhs.is_negative() ) && sign() != rhs.sign() ) {
+        prod.set_sign(NEG);
     }
     return prod.strip_leading(0);
 }
 
 big_number& big_number::operator*=(const big_number&rhs) {
+    *this = *this * rhs;
     return *this;
 }
