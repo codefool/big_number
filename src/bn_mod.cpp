@@ -34,13 +34,12 @@ big_number big_number::int_division(const big_number& den, big_number& rem) cons
         std::cout << quot << " " << div << " " << rem << std::endl;
         if ( div < den ) {
             quot.prepend(0);
-        } 
-        if ( div >= den ) {
+        } else {
             cnt = 0;
-            do {
+            while ( div >= den ) {
                 cnt++;
                 div -= den;
-            } while ( div >= den );
+            }
             quot.prepend(cnt);
             rem = div;
         }
