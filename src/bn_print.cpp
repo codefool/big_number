@@ -8,9 +8,10 @@ std::ostream& operator<<(std::ostream& os, big_number& obj) {
     if ( !idx ) {
         os << '0';
     } else {
-        while ( idx ) {
-            big_number::digit_t ch = obj[--idx];
-            os << (char)('0' + ch);
+        auto itr = obj.rbegin();
+        while (  itr != obj.rend() ) {
+            big_number::digit_t ch = ('0' + *itr++);
+            os << (char)(ch);
         }
     }
     return os;

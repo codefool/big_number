@@ -68,7 +68,8 @@ big_number big_number::sub_method_one(const big_number& rhs) const {
 big_number big_number::sub_method_two(const big_number& rhs) const {
     big_number cmp = rhs.nines_complement(rhs.magn());
     big_number res = *this + cmp;
-    res.b[--res.m] = 0;
+    res.truncate(1);
+    // res.b[--res.m] = 0;
     res += big_number::ONE;
     return res;
 }

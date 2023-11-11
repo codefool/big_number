@@ -12,7 +12,6 @@ big_number big_number::int_division(const big_number& den, big_number& rem) cons
         return ZERO;
     }
 
-    rem = 0;
     // long divison.
     //       00100371 r 45 => 100371 r 45
     // 123 | 12345678
@@ -24,14 +23,14 @@ big_number big_number::int_division(const big_number& den, big_number& rem) cons
     //            168
     //            123
     //             45  
-    big_number quot;
+    rem = 0;            // remainder
+    big_number quot;    // quotient
     big_number div;     // divisor
     digit_t cnt;
-    const digit_t *p = c_get_msd();
-    size_t c = magn();
-    while ( c-- ) {
-        div.prepend(*p--);
-        std::cout << quot << " " << div << " " << rem << std::endl;
+    // const digit_t *p = c_get_msd();
+    auto p = crbegin();
+    while ( p != crend() ) {
+        div.prepend(*p++);
         if ( div < den ) {
             quot.prepend(0);
         } else {
@@ -44,7 +43,6 @@ big_number big_number::int_division(const big_number& den, big_number& rem) cons
             rem = div;
         }
     }
-    std::cout << quot << " " << div << " " << rem << std::endl;
     if ( div >= den ) {
         cnt = 0;
         do {

@@ -26,23 +26,21 @@ big_number big_number::add(const big_number& rhs) const {
     digit_t digit;
     digit_t l;
     digit_t r;
-    digit_t       *s = sum.get();
-    const digit_t *a = c_get();
-    const digit_t *b = rhs.c_get();
+    auto s = sum.begin();
+    auto a = cbegin();
+    auto b = rhs.cbegin();
     // take a digit from each addend, add then together, then
     // sum = d
     size_t len = std::max(magn(), rhs.magn());
     for ( size_t idx(0); idx < len; ++idx ) {
-        l = (idx < magn()) ? *a++ : 0;
+        l = (idx < magn())     ? *a++ : 0;
         r = (idx < rhs.magn()) ? *b++ : 0;
         digit = l + r + carry;
-        *s++ = digit % 10;
-        sum.m++;
+        sum.append(digit % 10);
         carry = digit / 10;
     }
     if (carry) {
-        *s++ = carry;
-        sum.m++;
+        sum.append(carry);
     }
     return sum;
 }

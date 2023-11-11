@@ -6,8 +6,8 @@ big_number big_number::operator*(const big_number& rhs) const {
     digit_t digit;
     digit_t l;
     digit_t r;
-    const digit_t *a = c_get();
-    const digit_t *b = rhs.c_get();
+    auto a = cbegin();
+    auto b = rhs.cbegin();
     // take a digit from each factor, multiply them together, then
     // prod = d
     for ( size_t r = 0; r < rhs.magn(); ++r ) {
@@ -15,19 +15,20 @@ big_number big_number::operator*(const big_number& rhs) const {
         if ( x == 0 )
             continue;
         big_number i;
-        i.m = r+1;
-        digit_t *s = i.get() + r;
-        const digit_t *a = c_get();
+        size_t c = r;
+        while( c-- )
+            i.prepend(0);
+        auto s = i.begin();
+        std::advance(s, r);
+        auto a = cbegin();
         for ( size_t l = 0; l < magn(); ++l ) {
             digit = (*a++ * x) + carry;
-            *s++ = digit % 10;
-            i.m++;
+            i.append(digit % 10);
             carry = digit / 10;
         }
         while (carry) {
-            *s++ = carry % 10;
+            i.append(carry % 10);
             carry /= 10;
-            i.m++;
         }
         prod += i;
         std::cout << i << ' ' << prod << std::endl;

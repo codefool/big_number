@@ -3,7 +3,10 @@
 #include <iostream>
 #include <cstring>
 #include <cctype>
+#include <iterator>
 #include <memory>
+#include <string>
+#include <vector>
 
 #include "buildinfo.h"
 
@@ -13,23 +16,28 @@ public:
         POS = false,
         NEG = true
     };
-    static const size_t B_SIZE = 2048;
-    typedef signed char digit_t;
-    typedef digit_t buff_t[B_SIZE];
-    typedef size_t      magnitude_t;
+    typedef signed char          digit_t;
+    typedef std::vector<digit_t> buff_t;
 
 private:
-    sign_t                  s;  // true negative, false positive
-    magnitude_t             m;  // maginitude
-    std::shared_ptr<buff_t> b;
+    sign_t s;  // true negative, false positive
+    buff_t b;
 
 public:
     big_number();
-    big_number(const big_number& other);
     big_number(std::string num);
 
+    std::vector<digit_t>::iterator begin() { return b.begin(); }
+    std::vector<digit_t>::iterator end() { return b.end(); }
+    std::vector<digit_t>::reverse_iterator rbegin() { return b.rbegin(); }
+    std::vector<digit_t>::reverse_iterator rend() { return b.rend(); }
+    std::vector<digit_t>::const_iterator cbegin() const { return b.cbegin(); }
+    std::vector<digit_t>::const_iterator cend() const { return b.cend(); }
+    std::vector<digit_t>::const_reverse_iterator crbegin() const { return b.crbegin(); }
+    std::vector<digit_t>::const_reverse_iterator crend() const { return b.crend(); }
+
     bool is_zero() {
-        return *this == ZERO;
+        return b.size() == 0;
     }
 
     inline int sign() const {
@@ -61,16 +69,8 @@ public:
     }
 
     inline const size_t magn() const {
-        return m;
+        return b.size();
     }       
-
-    inline const digit_t *c_get() const {
-        return b.get();
-    }
-
-    inline const digit_t *c_get_msd() const {
-        return b.get() + m - 1;
-    }
 
     // answer -1 if lhs < rhs, 0 if lhs == rhs, and 1 if lhs > rhs
     int compare(const big_number& rhs) const;
@@ -136,11 +136,9 @@ public:
 private:
     void append(const digit_t digit);
     void prepend(const digit_t digit);
+    void truncate(size_t cnt);
     void reverse();
 
-    inline digit_t *get() {
-        return b.get();
-    }
 public:
     static big_number ONE;
     static big_number ZERO;

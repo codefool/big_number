@@ -1,27 +1,25 @@
 #include "big_number"
+#include <algorithm>
 
 big_number big_number::ONE("1");
 big_number big_number::ZERO("0");
 
 big_number::big_number() 
-: s(POS), 
-  m(0),
-  b(std::make_shared<buff_t>())
+: s(POS)
+// , m(0)
 {
-    std::memset(get(), 0x00, B_SIZE);
+    b.clear();
 }
 
-big_number::big_number(const big_number& other)
-: big_number()
-{
-    std::memcpy((void *)get(), (const void *)other.c_get(), other.magn());
-    m = other.m;
-    s = other.s;
-}
+// big_number::big_number(const big_number& other)
+// : s(other.s),
+// m(other.m),
+// b(other.b)
+// {}
 
 void big_number::operator=(const int64_t val) {
     if ( val == 0 ) {
-        m = 0;
+        // m = 0;
         s = POS;
         return;
     } 
@@ -33,7 +31,6 @@ void big_number::operator=(const int64_t val) {
     while ( wrk ) {
         append( wrk / 10 );
         wrk %= 10;
-        m++;
     }
     reverse();
 }
@@ -52,8 +49,7 @@ big_number::big_number(std::string num)
         ;
     if ( itr == num.end() ) {
         // value is zero
-        get()[0] == 0;
-        m++;
+        // m = 0;
         return;
     }
     // check for leading sign - if first char is '-' or '+' then set s accordingly
@@ -62,20 +58,14 @@ big_number::big_number(std::string num)
         s = (sign_t)(*itr++ == '-');
         signFound = true;
     }
-    auto p = get();
+    b.clear();
     while ( itr != num.end() && std::isdigit(*itr)) {
-        *p++ = *itr++ - '0';
-        m++;
+        prepend(*itr++ - '0');
     }
+    // b.erase(b.end());
     // check for trailing sign - if next char is '-' or '+' then set s accordingly
     if (itr != num.end() && !signFound && (*itr == '-' || *itr == '+')) {
         s = (sign_t)(*itr == '-');
-    }
-    auto q = get();
-    while( p-- > q ) {
-        auto t = *p;
-        *p   = *q;
-        *q++ = t;
     }
 }
 
@@ -85,23 +75,21 @@ int big_number::compare(const big_number& rhs) const {
     // rhs has more signifant digits, or lhs negative and rhs positive
     if ( magn() < rhs.magn() || (magn() < rhs.magn())) return -1;
     // lhs and rhs have same sign and number of signifiant digits
-    const digit_t *l = c_get() + magn() - 1;
-    const digit_t *r = rhs.c_get() + magn() - 1;
-    for( auto digit = magn(); digit; l--, r--, digit-- ) {
+    auto l = b.crbegin();
+    auto r = rhs.b.crbegin();
+    while ( l != b.crend() ) {
         if ( *l != *r ) {
-            int diff = (*l - *r) * sign();
+            int diff = ( *l - *r ) * sign();
             return diff;
         }
+        l++, r++;
     }
     return 0;
 }
 
 big_number& big_number::strip_leading(digit_t dig) {
-    auto front = get();
-    auto end   = front + magn() - 1;
-    while ( end > front && dig == *end-- ) {
-        m--;
-    }
+    while ( b.begin() != b.end() && dig == b.back() )
+        b.pop_back();
     return *this;
 }
 
@@ -129,25 +117,21 @@ big_number big_number::operator--(int) {
 
 // append digit to the end of the number (MSD)
 void big_number::append(const digit_t digit) {
-    if ( m < B_SIZE ) {
-        b[m++] = digit;
-    }
+    b.push_back(digit);
 }
 
-// prepend digit to the beginning of the number (LSD)
+// insert digit to the beginning of the number (LSD)
 void big_number::prepend(const digit_t digit) {
-    if ( m < B_SIZE ) {
-        std::memcpy(get()+1, get(), m++);
-        b[0] = digit;
+    b.insert(b.begin(), digit);
+}
+
+// remove cnt MSD's
+void big_number::truncate(size_t cnt) {
+    while( magn() && cnt-- ) {
+        b.erase(b.end());
     }
 }
 
 void big_number::reverse() {
-    auto *p = get() + m - 1;
-    auto q = get();
-    while( p > q ) {
-        auto t = *p;
-        *p-- = *q;
-        *q++ = t;
-    }
+    std::reverse(begin(), end());
 }
