@@ -6,20 +6,12 @@ big_number big_number::ZERO("0");
 
 big_number::big_number() 
 : s(POS)
-// , m(0)
 {
     b.clear();
 }
 
-// big_number::big_number(const big_number& other)
-// : s(other.s),
-// m(other.m),
-// b(other.b)
-// {}
-
-void big_number::operator=(const int64_t val) {
+big_number::big_number(const int64_t val) {
     if ( val == 0 ) {
-        // m = 0;
         s = POS;
         return;
     } 
@@ -29,12 +21,10 @@ void big_number::operator=(const int64_t val) {
         wrk = -wrk;
     }
     while ( wrk ) {
-        append( wrk / 10 );
-        wrk %= 10;
+        append( wrk % 10 );
+        wrk /= 10;
     }
-    reverse();
 }
-
 
 // accept a string of digits in canonical form
 // e.g. 1234567890
@@ -134,4 +124,25 @@ void big_number::truncate(size_t cnt) {
 
 void big_number::reverse() {
     std::reverse(begin(), end());
+}
+
+big_number big_number::factorial(size_t n) {
+    big_number ret = 1;
+    big_number cnt = n;
+    while( !cnt.is_zero() ) 
+        ret = ret * cnt--;
+    return ret;
+}
+
+big_number big_number::fibonacci(size_t n) {
+    if ( n == 0 || n == 1 )
+        return n;
+    big_number prev = ZERO;
+    big_number fib = ONE;
+    for ( size_t i = 2; i <= n; ++i ) {
+        big_number tmp = fib;
+        fib  = prev + fib;
+        prev = tmp;
+    }
+    return fib;
 }

@@ -47,5 +47,9 @@ int main(int argc, char **argv) {
 
     std::cout << ans << std::endl;
 
+    std::cout << big_number::factorial(100) << std::endl;
+
+    std::cout << big_number::fibonacci(100) << std::endl;
+
     return 0;
 }

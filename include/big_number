@@ -26,6 +26,7 @@ private:
 public:
     big_number();
     big_number(std::string num);
+    big_number(const int64_t val);
 
     std::vector<digit_t>::iterator begin() { return b.begin(); }
     std::vector<digit_t>::iterator end() { return b.end(); }
@@ -99,8 +100,6 @@ public:
         return b[index];
     }
 
-    void operator=(const int64_t val);
-
     big_number& operator++();
     big_number operator++(int);
     big_number& operator--();
@@ -131,7 +130,10 @@ public:
 
     big_number& strip_leading(digit_t dig = 0);
 
-    friend std::ostream& operator<<(std::ostream& os, big_number& obj);
+    friend std::ostream& operator<<(std::ostream& os, const big_number& obj);
+
+    static big_number factorial(size_t n);
+    static big_number fibonacci(size_t n);
 
 private:
     void append(const digit_t digit);

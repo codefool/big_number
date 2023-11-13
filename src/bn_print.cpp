@@ -1,6 +1,6 @@
 #include "big_number"
 
-std::ostream& operator<<(std::ostream& os, big_number& obj) {
+std::ostream& operator<<(std::ostream& os, const big_number& obj) {
     if (obj.sign() < 0 ) {
         os << '-';
     }
@@ -8,8 +8,8 @@ std::ostream& operator<<(std::ostream& os, big_number& obj) {
     if ( !idx ) {
         os << '0';
     } else {
-        auto itr = obj.rbegin();
-        while (  itr != obj.rend() ) {
+        auto itr = obj.crbegin();
+        while (  itr != obj.crend() ) {
             big_number::digit_t ch = ('0' + *itr++);
             os << (char)(ch);
         }
