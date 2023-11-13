@@ -1,4 +1,14 @@
+/*
+ * big_number - library for arbitrarily large numbers
+ *
+ * Copyright (C) 2023 Garyl Hester. All rights reserved.
+ * 
+ * This project lives at https://github.com/codefool/big_number
+ *
+ */
 #include "big_number"
+
+namespace cflib {
 
 big_number big_number::operator*(const big_number& rhs) const {
     big_number prod;
@@ -59,5 +69,4 @@ big_number& big_number::operator^=(const big_number&rhs) {
     *this = *this ^ rhs;
     return *this;
 }
-
-
+} // end namespace cflib

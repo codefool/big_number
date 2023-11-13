@@ -6,10 +6,10 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
-    big_number lhs(argv[1]);
+    cflib::big_number lhs(argv[1]);
     std::string op(argv[2]);
-    big_number rhs(argv[3]);
-    big_number ans;
+    cflib::big_number rhs(argv[3]);
+    cflib::big_number ans;
 
     std::string compops("==!=<><=>=co");
 
@@ -47,9 +47,9 @@ int main(int argc, char **argv) {
 
     std::cout << ans << std::endl;
 
-    std::cout << big_number::factorial(100) << std::endl;
+    std::cout << cflib::big_number::factorial(100) << std::endl;
 
-    std::cout << big_number::fibonacci(100) << std::endl;
+    std::cout << cflib::big_number::fibonacci(100) << std::endl;
 
     return 0;
 }

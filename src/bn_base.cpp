@@ -1,6 +1,15 @@
+/*
+ * big_number - library for arbitrarily large numbers
+ *
+ * Copyright (C) 2023 Garyl Hester. All rights reserved.
+ * 
+ * This project lives at https://github.com/codefool/big_number
+ *
+ */
 #include "big_number"
 #include <algorithm>
 
+namespace cflib {
 big_number big_number::ONE("1");
 big_number big_number::ZERO("0");
 
@@ -146,3 +155,4 @@ big_number big_number::fibonacci(size_t n) {
     }
     return fib;
 }
+} // end namespace cflib

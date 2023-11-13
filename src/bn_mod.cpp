@@ -1,5 +1,14 @@
+/*
+ * big_number - library for arbitrarily large numbers
+ *
+ * Copyright (C) 2023 Garyl Hester. All rights reserved.
+ * 
+ * This project lives at https://github.com/codefool/big_number
+ *
+ */
 #include "big_number"
 
+namespace cflib {
 
 // integer division. Determine the number of times rhs goes into lhs,
 // and return the count as big_number. Return any remainder in rem.
@@ -87,3 +96,4 @@ big_number& big_number::operator/=(const big_number& rhs) {
     *this = int_division(rhs, rem);
     return *this;
 }
+} // end namespace cflib

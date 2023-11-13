@@ -1,5 +1,14 @@
+/*
+ * big_number - library for arbitrarily large numbers
+ *
+ * Copyright (C) 2023 Garyl Hester. All rights reserved.
+ * 
+ * This project lives at https://github.com/codefool/big_number
+ *
+ */
 #include "big_number"
 
+namespace cflib {
 // subtract two positive numbers using complement method
 big_number big_number::operator-(const big_number& rhs) const {
     if ( *this == rhs ) {
@@ -84,3 +93,4 @@ big_number big_number::sub_method_diff_magn(const big_number& rhs) const {
     auto res = sub_method_two(inter);
     return res;
 }
+} // end namespace cflib

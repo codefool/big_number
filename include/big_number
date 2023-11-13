@@ -1,3 +1,11 @@
+/*
+ * big_number - library for arbitrarily large numbers
+ *
+ * Copyright (C) 2023 Garyl Hester. All rights reserved.
+ * 
+ * This project lives at https://github.com/codefool/big_number
+ *
+ */
 #pragma once
 
 #include <iostream>
@@ -10,6 +18,8 @@
 
 #include "buildinfo.h"
 
+namespace cflib {
+
 class big_number {
 public:
     enum sign_t : bool {
@@ -20,8 +30,9 @@ public:
     typedef std::vector<digit_t> buff_t;
 
 private:
-    sign_t s;  // true negative, false positive
-    buff_t b;
+    sign_t s;  // sign - true negative, false positive
+    size_t d;  // position of decimal point
+    buff_t b;  // buffer with number
 
 public:
     big_number();
@@ -145,3 +156,4 @@ public:
     static big_number ONE;
     static big_number ZERO;
 };
+} // end namespace cflib

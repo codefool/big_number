@@ -1,5 +1,14 @@
+/*
+ * big_number - library for arbitrarily large numbers
+ *
+ * Copyright (C) 2023 Garyl Hester. All rights reserved.
+ * 
+ * This project lives at https://github.com/codefool/big_number
+ *
+ */
 #include "big_number"
 
+namespace cflib {
 // basic add ability
 //
 // this does basic columnar arithmetic
@@ -44,3 +53,4 @@ big_number big_number::add(const big_number& rhs) const {
     }
     return sum;
 }
+} // end namespace cflib
