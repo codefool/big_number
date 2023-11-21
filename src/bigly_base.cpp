@@ -1,37 +1,38 @@
 /*
- * big_number - library for arbitrarily large numbers
+ * bigly - library for arbitrarily large numbers
  *
  * Copyright (C) 2023 Garyl Hester. All rights reserved.
  * 
- * This project lives at https://github.com/codefool/big_number
+ * This project lives at https://github.com/codefool/bigly
  *
  */
-#include "big_number"
+#include "bigly"
 #include <algorithm>
 
 namespace cflib {
-big_number big_number::ONE("1");
-big_number big_number::ZERO("0");
+bigly bigly::ONE("1");
+bigly bigly::ZERO("0");
 
-big_number::big_number() 
+bigly::bigly() 
 : s(POS)
+, d(0)
 {
-    b.clear();
+    m.clear();
 }
 
-big_number::big_number(const int64_t val) {
-    if ( val == 0 ) {
-        s = POS;
-        return;
-    } 
-    int64_t wrk = val;
-    if ( wrk < 0 ) {
-        s = NEG;
-        wrk = -wrk;
-    }
-    while ( wrk ) {
-        append( wrk % 10 );
-        wrk /= 10;
+bigly::bigly(const int64_t val) 
+: bigly()
+{
+    if ( val != 0 ) {
+        int64_t wrk = val;
+        if ( wrk < 0 ) {
+            s = NEG;
+            wrk = -wrk;
+        }
+        while ( wrk ) {
+            append( wrk % 10 );
+            wrk /= 10;
+        }
     }
 }
 
@@ -40,8 +41,8 @@ big_number::big_number(const int64_t val) {
 // - leading zeros are ignored (removed)
 // - the remaining digits are the significant digit count
 // - the number is then loaded into the buffer LSD first
-big_number::big_number(std::string num) 
-: big_number()
+bigly::bigly(std::string num) 
+: bigly()
 {
     auto itr = num.begin();
     for( ; itr != num.end() && (std::isspace(*itr) || *itr == '0'); ++itr)
@@ -57,26 +58,30 @@ big_number::big_number(std::string num)
         s = (sign_t)(*itr++ == '-');
         signFound = true;
     }
-    b.clear();
+    m.clear();
     while ( itr != num.end() && std::isdigit(*itr)) {
         prepend(*itr++ - '0');
     }
-    // b.erase(b.end());
     // check for trailing sign - if next char is '-' or '+' then set s accordingly
     if (itr != num.end() && !signFound && (*itr == '-' || *itr == '+')) {
         s = (sign_t)(*itr == '-');
     }
 }
 
-int big_number::compare(const big_number& rhs) const {
+bigly::bigly(const int64_t mant, const int64_t frac)
+: bigly()
+{
+}
+
+int bigly::compare(const bigly& rhs) const {
     // lhs has more signifant digits, or lhs positive and rhs negative
     if ( magn() > rhs.magn() || (magn() > rhs.magn())) return 1;
     // rhs has more signifant digits, or lhs negative and rhs positive
     if ( magn() < rhs.magn() || (magn() < rhs.magn())) return -1;
     // lhs and rhs have same sign and number of signifiant digits
-    auto l = b.crbegin();
-    auto r = rhs.b.crbegin();
-    while ( l != b.crend() ) {
+    auto l = crbegin();
+    auto r = rhs.crbegin();
+    while ( l != crend() ) {
         if ( *l != *r ) {
             int diff = ( *l - *r ) * sign();
             return diff;
@@ -86,73 +91,74 @@ int big_number::compare(const big_number& rhs) const {
     return 0;
 }
 
-big_number& big_number::strip_leading(digit_t dig) {
-    while ( b.begin() != b.end() && dig == b.back() )
-        b.pop_back();
+bigly& bigly::strip_leading(digit_t dig) {
+    while ( m.begin() != m.end() && dig == m.back() )
+        m.pop_back();
     return *this;
 }
 
-big_number& big_number::operator++() {
+bigly& bigly::operator++() {
     *this += ONE;
     return *this;
 }
 
-big_number big_number::operator++(int) {
+bigly bigly::operator++(int) {
     auto ret = *this;
     ++(*this);
     return ret;
 }
 
-big_number& big_number::operator--() {
+bigly& bigly::operator--() {
     *this -= ONE;
     return *this;
 }
 
-big_number big_number::operator--(int) {
+bigly bigly::operator--(int) {
     auto ret = *this;
     --(*this);
     return ret;
 }
 
 // append digit to the end of the number (MSD)
-void big_number::append(const digit_t digit) {
-    b.push_back(digit);
+void bigly::append(const digit_t digit) {
+    m.push_back(digit);
 }
 
 // insert digit to the beginning of the number (LSD)
-void big_number::prepend(const digit_t digit) {
-    b.insert(b.begin(), digit);
+void bigly::prepend(const digit_t digit) {
+    m.insert(m.begin(), digit);
 }
 
 // remove cnt MSD's
-void big_number::truncate(size_t cnt) {
+void bigly::truncate(size_t cnt) {
     while( magn() && cnt-- ) {
-        b.erase(b.end());
+        m.erase(m.end());
     }
 }
 
-void big_number::reverse() {
+void bigly::reverse() {
     std::reverse(begin(), end());
 }
 
-big_number big_number::factorial(size_t n) {
-    big_number ret = 1;
-    big_number cnt = n;
+bigly bigly::factorial(size_t n) {
+    bigly ret = 1;
+    bigly cnt = n;
     while( !cnt.is_zero() ) 
         ret = ret * cnt--;
     return ret;
 }
 
-big_number big_number::fibonacci(size_t n) {
+bigly bigly::fibonacci(size_t n) {
     if ( n == 0 || n == 1 )
         return n;
-    big_number prev = ZERO;
-    big_number fib = ONE;
+    bigly prev = ZERO;
+    bigly fib = ONE;
     for ( size_t i = 2; i <= n; ++i ) {
-        big_number tmp = fib;
+        bigly tmp = fib;
         fib  = prev + fib;
         prev = tmp;
     }
     return fib;
 }
+
 } // end namespace cflib

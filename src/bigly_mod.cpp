@@ -1,18 +1,18 @@
 /*
- * big_number - library for arbitrarily large numbers
+ * bigly - library for arbitrarily large numbers
  *
  * Copyright (C) 2023 Garyl Hester. All rights reserved.
  * 
- * This project lives at https://github.com/codefool/big_number
+ * This project lives at https://github.com/codefool/bigly
  *
  */
-#include "big_number"
+#include "bigly"
 
 namespace cflib {
 
 // integer division. Determine the number of times rhs goes into lhs,
-// and return the count as big_number. Return any remainder in rem.
-big_number big_number::int_division(const big_number& den, big_number& rem) const {
+// and return the count as bigly. Return any remainder in rem.
+bigly bigly::int_division(const bigly& den, bigly& rem) const {
     // this is the numerator (N)
     // if the number of digits in denomenator is more than numerator, 
     // then answer is 0rN
@@ -33,8 +33,8 @@ big_number big_number::int_division(const big_number& den, big_number& rem) cons
     //            123
     //             45  
     rem = 0;            // remainder
-    big_number quot;    // quotient
-    big_number div;     // divisor
+    bigly quot;    // quotient
+    bigly div;     // divisor
     digit_t cnt;
     // const digit_t *p = c_get_msd();
     auto p = crbegin();
@@ -67,16 +67,16 @@ big_number big_number::int_division(const big_number& den, big_number& rem) cons
 
 // modulus artithmetic
 // returns the remainder of lhs / rhs
-big_number big_number::operator%(const big_number& rhs) const {
-    big_number rem;
+bigly bigly::operator%(const bigly& rhs) const {
+    bigly rem;
     int_division(rhs, rem);
     return rem;
 }
 
 // modulus artithmetic
 // returns the remainder of lhs / rhs
-big_number& big_number::operator%=(const big_number& rhs) {
-    big_number rem;
+bigly& bigly::operator%=(const bigly& rhs) {
+    bigly rem;
     int_division(rhs, rem);
     *this = rem;
     return *this;
@@ -84,15 +84,15 @@ big_number& big_number::operator%=(const big_number& rhs) {
 
 // integer division
 // returns the count of times rhs fits into lhs.
-big_number big_number::operator/(const big_number& rhs) const {
-    big_number rem;
+bigly bigly::operator/(const bigly& rhs) const {
+    bigly rem;
     return int_division(rhs, rem);
 }
 
 // integer division
 // returns the count of times rhs fits into lhs.
-big_number& big_number::operator/=(const big_number& rhs) {
-    big_number rem;
+bigly& bigly::operator/=(const bigly& rhs) {
+    bigly rem;
     *this = int_division(rhs, rem);
     return *this;
 }

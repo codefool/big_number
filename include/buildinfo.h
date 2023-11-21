@@ -3,10 +3,10 @@
 #include <string>
 
 struct build_info {
-    std::string app_name = "big_number";
+    std::string app_name = "cflib::bigly";
     int ver_major = 0;
     int ver_minor = 0;
-    int ver_build = 239;
+    int ver_build = 249;
     friend std::ostream& operator<< (std::ostream& os, const build_info& bi);
 };
 

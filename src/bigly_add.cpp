@@ -1,19 +1,19 @@
 /*
- * big_number - library for arbitrarily large numbers
+ * bigly - library for arbitrarily large numbers
  *
  * Copyright (C) 2023 Garyl Hester. All rights reserved.
  * 
- * This project lives at https://github.com/codefool/big_number
+ * This project lives at https://github.com/codefool/bigly
  *
  */
-#include "big_number"
+#include "bigly"
 
 namespace cflib {
 // basic add ability
 //
 // this does basic columnar arithmetic
 // 
-big_number big_number::operator+(const big_number& rhs) const {
+bigly bigly::operator+(const bigly& rhs) const {
     // a + -b === a - b
     if ( rhs.is_negative() ) {
         return *this - rhs.abs();
@@ -24,13 +24,13 @@ big_number big_number::operator+(const big_number& rhs) const {
     return add(rhs);
 }
 
-big_number& big_number::operator+=(const big_number& rhs) {
+bigly& bigly::operator+=(const bigly& rhs) {
     *this = *this + rhs;
     return *this;
 }
 
-big_number big_number::add(const big_number& rhs) const {
-    big_number sum;
+bigly bigly::add(const bigly& rhs) const {
+    bigly sum;
     digit_t carry(0);
     digit_t digit;
     digit_t l;

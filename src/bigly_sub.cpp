@@ -1,18 +1,18 @@
 /*
- * big_number - library for arbitrarily large numbers
+ * bigly - library for arbitrarily large numbers
  *
  * Copyright (C) 2023 Garyl Hester. All rights reserved.
  * 
- * This project lives at https://github.com/codefool/big_number
+ * This project lives at https://github.com/codefool/bigly
  *
  */
-#include "big_number"
+#include "bigly"
 
 namespace cflib {
 // subtract two positive numbers using complement method
-big_number big_number::operator-(const big_number& rhs) const {
+bigly bigly::operator-(const bigly& rhs) const {
     if ( *this == rhs ) {
-        return big_number::ZERO;
+        return bigly::ZERO;
     }
     if ( is_negative() ) { 
         if ( rhs.is_positive() ) {
@@ -23,7 +23,7 @@ big_number big_number::operator-(const big_number& rhs) const {
         return ( negate() - rhs.negate() ).negate();
     }
     if ( magn() != rhs.magn() ) {
-        big_number res;
+        bigly res;
         if ( magn() > rhs.magn() ) {
             res = sub_method_diff_magn(rhs).strip_leading();
         } else {
@@ -40,7 +40,7 @@ big_number big_number::operator-(const big_number& rhs) const {
     return sub_method_one(rhs).strip_leading();
 }
 
-big_number& big_number::operator-=(const big_number& rhs) {
+bigly& bigly::operator-=(const bigly& rhs) {
     *this = *this - rhs;
     return *this;
 }
@@ -49,8 +49,8 @@ big_number& big_number::operator-=(const big_number& rhs) {
 // The nines' complement of a decimal digit is the number that must
 // be added to it to produce 9, e.g. the nines' complement of 3 is 6.
 //
-big_number big_number::nines_complement(const size_t len) const {
-    big_number cmp(*this);  
+bigly bigly::nines_complement(const size_t len) const {
+    bigly cmp(*this);  
     int idx(0);  
     for ( ; idx < magn(); ++idx) {
         cmp[idx] = 9 - cmp[idx];
@@ -64,9 +64,9 @@ big_number big_number::nines_complement(const size_t len) const {
 // 1. Compute the nines' complement of the minuend
 // 2. Add it to the subtrahend
 // 3. Compute the nines' complement of the result
-big_number big_number::sub_method_one(const big_number& rhs) const {
-    big_number cmp = nines_complement(rhs.magn());
-    big_number res = cmp + rhs;
+bigly bigly::sub_method_one(const bigly& rhs) const {
+    bigly cmp = nines_complement(rhs.magn());
+    bigly res = cmp + rhs;
     return res.nines_complement(res.magn());
 }
 
@@ -74,20 +74,20 @@ big_number big_number::sub_method_one(const big_number& rhs) const {
 // 2. Add it to the minuend
 // 3. Drop the leading '1'
 // 4. Add 1 to the answer.
-big_number big_number::sub_method_two(const big_number& rhs) const {
-    big_number cmp = rhs.nines_complement(rhs.magn());
-    big_number res = *this + cmp;
+bigly bigly::sub_method_two(const bigly& rhs) const {
+    bigly cmp = rhs.nines_complement(rhs.magn());
+    bigly res = *this + cmp;
     res.truncate(1);
     // res.b[--res.m] = 0;
-    res += big_number::ONE;
+    res += bigly::ONE;
     return res;
 }
 
 // if the subtrahend has fewer digits than the minuend, leading zeros must be
 // added in the second method. The zeros become the leading nines when 
 // complement is taken.
-big_number big_number::sub_method_diff_magn(const big_number& rhs) const {
-    big_number inter(rhs);
+bigly bigly::sub_method_diff_magn(const bigly& rhs) const {
+    bigly inter(rhs);
     while(inter.magn() < magn())
         inter.append(0);
     auto res = sub_method_two(inter);

@@ -1,0 +1,164 @@
+/*
+ * bigly - library for arbitrarily large numbers
+ *
+ * Copyright (C) 2023 Garyl Hester. All rights reserved.
+ * 
+ * This project lives at https://github.com/codefool/bigly
+ *
+ */
+#pragma once
+
+#include <iostream>
+#include <cstring>
+#include <cctype>
+#include <iterator>
+#include <memory>
+#include <string>
+#include <vector>
+
+#include "buildinfo.h"
+
+namespace cflib {
+
+class bigly {
+public:
+    enum sign_t : bool {
+        POS = false,
+        NEG = true
+    };
+    typedef signed char          digit_t;
+    typedef std::vector<digit_t> buff_t;
+
+private:
+    sign_t s;  // sign - true negative, false positive
+    size_t d;  // position of decimal point
+    buff_t m;  // buffer with mantissa
+
+public:
+    bigly();
+    bigly(std::string num);
+    bigly(const int64_t val);
+    bigly(const int64_t mant, const int64_t frac);
+
+    std::vector<digit_t>::iterator begin() { return m.begin(); }
+    std::vector<digit_t>::iterator end() { return m.end(); }
+    std::vector<digit_t>::reverse_iterator rbegin() { return m.rbegin(); }
+    std::vector<digit_t>::reverse_iterator rend() { return m.rend(); }
+    std::vector<digit_t>::const_iterator cbegin() const { return m.cbegin(); }
+    std::vector<digit_t>::const_iterator cend() const { return m.cend(); }
+    std::vector<digit_t>::const_reverse_iterator crbegin() const { return m.crbegin(); }
+    std::vector<digit_t>::const_reverse_iterator crend() const { return m.crend(); }
+
+    bool is_zero() {
+        return m.size() == 0;
+    }
+
+    inline int sign() const {
+        return s ? -1 : 1;
+    }
+
+    bigly abs() const {
+        bigly ret(*this);
+        ret.s = POS;
+        return ret;
+    }
+
+    bigly negate() const {
+        auto ret(*this);
+        ret.s = (sign_t)(!s);
+        return ret;
+    }
+
+    void set_sign(sign_t t) {
+        s = t;
+    }
+
+    bool is_negative() const {
+        return s;
+    }
+
+    bool is_positive() const {
+        return !s;
+    }
+
+    inline const size_t magn() const {
+        return m.size() - d;
+    }
+
+    inline const size_t frac() const {
+        return d;
+    }
+
+    // answer -1 if lhs < rhs, 0 if lhs == rhs, and 1 if lhs > rhs
+    int compare(const bigly& rhs) const;
+
+    inline bool operator==(const bigly& rhs) const {
+        return compare(rhs) == 0;
+    }
+
+    inline bool operator<(const bigly& rhs) const {
+        return compare(rhs) < 0;
+    }
+
+    inline bool operator<=(const bigly& rhs) const {
+        return compare(rhs) <= 0;
+    }
+
+    inline bool operator>(const bigly& rhs) const {
+        return compare(rhs) > 0;
+    }
+
+    inline bool operator>=(const bigly& rhs) const {
+        return compare(rhs) >= 0;
+    }
+
+    inline digit_t& operator[](size_t index) {
+        return m[index];
+    }
+
+    bigly& operator++();
+    bigly operator++(int);
+    bigly& operator--();
+    bigly operator--(int);
+
+    bigly operator+(const bigly& rhs) const;
+    bigly& operator+=(const bigly& rhs);
+
+    bigly operator-(const bigly& rhs) const;
+    bigly& operator-=(const bigly& rhs);
+
+    bigly operator*(const bigly& rhs) const;
+    bigly& operator*=(const bigly&rhs);
+    bigly operator^(const bigly& rhs) const;
+    bigly& operator^=(const bigly&rhs);
+
+    bigly operator%(const bigly& rhs) const;
+    bigly& operator%=(const bigly& rhs);
+    bigly operator/(const bigly& rhs) const;
+    bigly& operator/=(const bigly& rhs);
+
+    bigly add(const bigly& rhs) const;
+    bigly sub_method_one(const bigly&rhs) const;
+    bigly sub_method_two(const bigly& rhs) const;
+    bigly sub_method_diff_magn(const bigly& rhs) const;
+    bigly nines_complement(const size_t len) const;
+    bigly int_division(const bigly& rhs, bigly& rem) const;
+
+    bigly& strip_leading(digit_t dig = 0);
+
+    friend std::ostream& operator<<(std::ostream& os, const bigly& obj);
+
+    static bigly factorial(size_t n);
+    static bigly fibonacci(size_t n);
+
+private:
+    void append(const digit_t digit);
+    void prepend(const digit_t digit);
+    void truncate(size_t cnt);
+    void reverse();
+
+public:
+    static bigly ONE;
+    static bigly ZERO;
+};
+} // end namespace cflib

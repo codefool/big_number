@@ -1,17 +1,17 @@
 /*
- * big_number - library for arbitrarily large numbers
+ * bigly - library for arbitrarily large numbers
  *
  * Copyright (C) 2023 Garyl Hester. All rights reserved.
  * 
- * This project lives at https://github.com/codefool/big_number
+ * This project lives at https://github.com/codefool/bigly
  *
  */
-#include "big_number"
+#include "bigly"
 
 namespace cflib {
 
-big_number big_number::operator*(const big_number& rhs) const {
-    big_number prod;
+bigly bigly::operator*(const bigly& rhs) const {
+    bigly prod;
     digit_t carry(0);
     digit_t digit;
     digit_t l;
@@ -24,7 +24,7 @@ big_number big_number::operator*(const big_number& rhs) const {
         const digit_t x = *b++;
         if ( x == 0 )
             continue;
-        big_number i;
+        bigly i;
         size_t c = r;
         while( c-- )
             i.prepend(0);
@@ -51,21 +51,21 @@ big_number big_number::operator*(const big_number& rhs) const {
     return prod.strip_leading(0);
 }
 
-big_number& big_number::operator*=(const big_number&rhs) {
+bigly& bigly::operator*=(const bigly&rhs) {
     *this = *this * rhs;
     return *this;
 }
 
-big_number big_number::operator^(const big_number& rhs) const {
-    big_number prod(*this);
-    big_number exp(rhs);
+bigly bigly::operator^(const bigly& rhs) const {
+    bigly prod(*this);
+    bigly exp(rhs);
     while ( --exp > ZERO ) {
         prod *= *this;
     }
     return prod;
 }
 
-big_number& big_number::operator^=(const big_number&rhs) {
+bigly& bigly::operator^=(const bigly&rhs) {
     *this = *this ^ rhs;
     return *this;
 }

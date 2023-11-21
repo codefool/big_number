@@ -1,4 +1,4 @@
-#include "big_number"
+#include "bigly"
 
 int main(int argc, char **argv) {
     if ( argc < 3 ) {
@@ -6,10 +6,10 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
-    cflib::big_number lhs(argv[1]);
+    cflib::bigly lhs(argv[1]);
     std::string op(argv[2]);
-    cflib::big_number rhs(argv[3]);
-    cflib::big_number ans;
+    cflib::bigly rhs(argv[3]);
+    cflib::bigly ans;
 
     std::string compops("==!=<><=>=co");
 
@@ -47,9 +47,9 @@ int main(int argc, char **argv) {
 
     std::cout << ans << std::endl;
 
-    std::cout << cflib::big_number::factorial(100) << std::endl;
+    std::cout << cflib::bigly::factorial(100) << std::endl;
 
-    std::cout << cflib::big_number::fibonacci(100) << std::endl;
+    std::cout << cflib::bigly::fibonacci(100) << std::endl;
 
     return 0;
 }

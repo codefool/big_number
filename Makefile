@@ -7,7 +7,7 @@ INC_DIR := ./include
 SRC_DIR := ./src
 OBJ_DIR := ./obj
 LIB_DIR := ./lib
-LIB_NAME := $(LIB_DIR)/libbignum
+LIB_NAME := $(LIB_DIR)/libbigly
 # LIB_INC := /usr/local/libcf/lib/libcf
 
 SRC := $(wildcard $(SRC_DIR)/*.cpp)
