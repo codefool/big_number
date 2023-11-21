@@ -40,14 +40,28 @@ public:
     bigly(const int64_t val);
     bigly(const int64_t mant, const int64_t frac);
 
-    std::vector<digit_t>::iterator begin() { return m.begin(); }
-    std::vector<digit_t>::iterator end() { return m.end(); }
-    std::vector<digit_t>::reverse_iterator rbegin() { return m.rbegin(); }
-    std::vector<digit_t>::reverse_iterator rend() { return m.rend(); }
-    std::vector<digit_t>::const_iterator cbegin() const { return m.cbegin(); }
-    std::vector<digit_t>::const_iterator cend() const { return m.cend(); }
-    std::vector<digit_t>::const_reverse_iterator crbegin() const { return m.crbegin(); }
-    std::vector<digit_t>::const_reverse_iterator crend() const { return m.crend(); }
+    // two contexts - mantiassa and fraction
+    // mantissa is from advance(begin(), d)..end()
+    // fraction is begin()..advance(begin(), d-1)
+    // if d is zero then no fraction.
+    std::vector<digit_t>::iterator begin();
+    std::vector<digit_t>::iterator end();
+    std::vector<digit_t>::reverse_iterator rbegin();
+    std::vector<digit_t>::reverse_iterator rend();
+    std::vector<digit_t>::const_iterator cbegin() const;
+    std::vector<digit_t>::const_iterator cend() const;
+    std::vector<digit_t>::const_reverse_iterator crbegin() const;
+    std::vector<digit_t>::const_reverse_iterator crend() const;
+
+    // fraction iterators
+    std::vector<digit_t>::iterator fbegin();
+    std::vector<digit_t>::iterator fend();
+    std::vector<digit_t>::reverse_iterator frbegin();
+    std::vector<digit_t>::reverse_iterator frend();
+    std::vector<digit_t>::const_iterator fcbegin() const;
+    std::vector<digit_t>::const_iterator fcend() const;
+    std::vector<digit_t>::const_reverse_iterator fcrbegin() const;
+    std::vector<digit_t>::const_reverse_iterator fcrend() const;
 
     bool is_zero() {
         return m.size() == 0;
@@ -154,6 +168,8 @@ public:
 private:
     void append(const digit_t digit);
     void prepend(const digit_t digit);
+    void appfrac(const digit_t digit);
+    void prefrac(const digit_t digit);
     void truncate(size_t cnt);
     void reverse();
 

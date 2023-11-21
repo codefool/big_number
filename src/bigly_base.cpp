@@ -73,6 +73,108 @@ bigly::bigly(const int64_t mant, const int64_t frac)
 {
 }
 
+// iterators
+// two contexts - mantiassa and fraction
+// mantissa is from advance(begin(), d)..end()
+// fraction is begin()..advance(begin(), d-1)
+// if d is zero then no fraction.
+std::vector<bigly::digit_t>::iterator bigly::begin() {
+    auto ret = m.begin();
+    if ( d ) {
+        std::advance(ret, d);
+    }
+    return ret;
+}
+
+std::vector<bigly::digit_t>::iterator bigly::end() {
+    return m.end(); 
+}
+
+std::vector<bigly::digit_t>::reverse_iterator bigly::rbegin() {
+    auto ret = m.rbegin();
+    if ( d ) {
+        std::advance(ret, d);
+    }
+    return ret;
+}
+
+std::vector<bigly::digit_t>::reverse_iterator bigly::rend() {
+    return m.rend(); 
+}
+
+std::vector<bigly::digit_t>::const_iterator bigly::cbegin() const {
+    auto ret = m.cbegin();
+    if ( d ) {
+        std::advance(ret, d);
+    }
+    return ret;
+}
+
+std::vector<bigly::digit_t>::const_iterator bigly::cend() const { 
+    return m.cend(); 
+}
+
+std::vector<bigly::digit_t>::const_reverse_iterator bigly::crbegin() const { 
+    auto ret = m.crbegin();
+    if ( d ) {
+        std::advance(ret, d);
+    }
+    return ret;
+}
+
+std::vector<bigly::digit_t>::const_reverse_iterator bigly::crend() const { 
+    return m.crend(); 
+}
+
+// fraction iterators
+std::vector<bigly::digit_t>::iterator bigly::fbegin() { 
+    if ( !d ) return m.end();
+    return m.begin();
+}
+
+std::vector<bigly::digit_t>::iterator bigly::fend() { 
+    if ( !d ) return m.end();
+    auto ret = m.begin();
+    std::advance(ret, d - 1);
+    return ret; 
+}
+
+std::vector<bigly::digit_t>::reverse_iterator bigly::frbegin() { 
+    if ( !d ) return m.rend();
+    return m.rbegin(); 
+}
+
+std::vector<bigly::digit_t>::reverse_iterator bigly::frend() { 
+    if ( !d ) return m.rend();
+    auto ret = m.rbegin();
+    std::advance(ret, d - 1);
+    return ret; 
+}
+
+std::vector<bigly::digit_t>::const_iterator bigly::fcbegin() const { 
+    if ( !d ) return m.cend();
+    return m.cbegin(); 
+}
+
+std::vector<bigly::digit_t>::const_iterator bigly::fcend() const { 
+    if ( !d ) return m.cend();
+    auto ret = m.cbegin();
+    std::advance(ret, d - 1);
+    return ret; 
+}
+
+std::vector<bigly::digit_t>::const_reverse_iterator bigly::fcrbegin() const { 
+    if ( !d ) return m.crend();
+    return m.crbegin(); 
+}
+
+std::vector<bigly::digit_t>::const_reverse_iterator bigly::fcrend() const { 
+    if ( !d ) return m.crend();
+    auto ret = m.crbegin();
+    std::advance(ret, d - 1);
+    return ret; 
+}
+
 int bigly::compare(const bigly& rhs) const {
     // lhs has more signifant digits, or lhs positive and rhs negative
     if ( magn() > rhs.magn() || (magn() > rhs.magn())) return 1;
@@ -127,6 +229,16 @@ void bigly::append(const digit_t digit) {
 // insert digit to the beginning of the number (LSD)
 void bigly::prepend(const digit_t digit) {
     m.insert(m.begin(), digit);
+}
+
+// append frac digit to the end of the fraction
+void bigly::appfrac(const digit_t digit) {
+    d++;
+}
+
+// insert digit to the beginning of the fraction
+void bigly::prefrac(const digit_t digit) {
+    d++;
 }
 
 // remove cnt MSD's
