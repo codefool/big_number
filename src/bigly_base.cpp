@@ -10,8 +10,8 @@
 #include <algorithm>
 
 namespace cflib {
-bigly bigly::ONE("1");
-bigly bigly::ZERO("0");
+bigly bigly::ONE(0x01);
+bigly bigly::ZERO(0x00);
 
 bigly::bigly() 
 : s(POS)
