@@ -47,18 +47,9 @@ int main(int argc, char **argv) {
 
     std::cout << ans << std::endl;
 
-    std::cout << cflib::bigly::factorial(100) << std::endl;
+    // std::cout << cflib::bigly::factorial(100) << std::endl;
 
-    std::cout << cflib::bigly::fibonacci(100) << std::endl;
-
-    cflib::bigly frac(100);
-    frac.prefrac(1);
-    frac.prefrac(2);
-    frac.prefrac(3);
-    frac.prefrac(4);
-    std::cout << frac << std::endl;
-
-
+    // std::cout << cflib::bigly::fibonacci(100) << std::endl;
 
     return 0;
 }

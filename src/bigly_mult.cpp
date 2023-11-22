@@ -16,28 +16,28 @@ bigly bigly::operator*(const bigly& rhs) const {
     digit_t digit;
     digit_t l;
     digit_t r;
-    auto a = cbegin();
-    auto b = rhs.cbegin();
+    auto a = mend();
+    auto b = rhs.mend();
     // take a digit from each factor, multiply them together, then
     // prod = d
-    for ( size_t r = 0; r < rhs.magn(); ++r ) {
+    for ( size_t r = 0; r < rhs.mant(); ++r ) {
         const digit_t x = *b++;
         if ( x == 0 )
             continue;
         bigly i;
         size_t c = r;
         while( c-- )
-            i.prepend(0);
+            i.mpush_back(0);
         auto s = i.begin();
         std::advance(s, r);
-        auto a = cbegin();
-        for ( size_t l = 0; l < magn(); ++l ) {
+        auto a = begin();
+        for ( size_t l = 0; l < mant(); ++l ) {
             digit = (*a++ * x) + carry;
-            i.append(digit % 10);
+            i.mpush_back(digit % 10);
             carry = digit / 10;
         }
         while (carry) {
-            i.append(carry % 10);
+            i.mpush_back(carry % 10);
             carry /= 10;
         }
         prod += i;

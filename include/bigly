@@ -27,44 +27,45 @@ public:
         NEG = true
     };
     typedef signed char          digit_t;
-    typedef std::vector<digit_t> buff_t;
+    const size_t BLOCK_SIZE = 1024;
 
 private:
-    sign_t s;  // sign - true negative, false positive
-    size_t d;  // position of decimal point
-    buff_t m;  // buffer with mantissa
+    sign_t   s;  // sign - true negative, false positive
+    size_t   c;  // no. digits used in m
+    size_t   d;  // no. of fractional digits
+    size_t   b;  // block count
+    size_t   z;  // size of m
+    digit_t *m;  // buffer with mantissa
 
 public:
     bigly();
+    bigly(const bigly& o);
     bigly(std::string num);
     bigly(const int64_t val);
     bigly(const int64_t mant, const int64_t frac);
+    virtual ~bigly();
 
-    // two contexts - mantiassa and fraction
-    // mantissa is from advance(begin(), d)..end()
-    // fraction is begin()..advance(begin(), d-1)
-    // if d is zero then no fraction.
-    std::vector<digit_t>::iterator begin();
-    std::vector<digit_t>::iterator end();
-    std::vector<digit_t>::reverse_iterator rbegin();
-    std::vector<digit_t>::reverse_iterator rend();
-    std::vector<digit_t>::const_iterator cbegin() const;
-    std::vector<digit_t>::const_iterator cend() const;
-    std::vector<digit_t>::const_reverse_iterator crbegin() const;
-    std::vector<digit_t>::const_reverse_iterator crend() const;
+    //   +-- end
+    //   +-- mend
+    //   |  +-- mbegin
+    //   |  +-- d
+    //   1234.5678
+    //        |  +-- begin
+    //        |  +-- fbegin
+    //        +-- fend  
 
-    // fraction iterators
-    std::vector<digit_t>::iterator fbegin();
-    std::vector<digit_t>::iterator fend();
-    std::vector<digit_t>::reverse_iterator frbegin();
-    std::vector<digit_t>::reverse_iterator frend();
-    std::vector<digit_t>::const_iterator fcbegin() const;
-    std::vector<digit_t>::const_iterator fcend() const;
-    std::vector<digit_t>::const_reverse_iterator fcrbegin() const;
-    std::vector<digit_t>::const_reverse_iterator fcrend() const;
+    const signed char *end()    const { return m + c - 1; }
+    const signed char *begin()  const { return m; }
+    const signed char *mend()   const { return end(); }
+    const signed char *mbegin() const { return m + d; }
+    const signed char *fend()   const { return m + d - 1; }
+    const signed char *fbegin() const { return begin(); }
+
+    size_t mant() const { return c - d; }
+    size_t frac() const { return d; }
 
     bool is_zero() {
-        return m.size() == 0;
+        return c == 0;
     }
 
     inline int sign() const {
@@ -95,14 +96,6 @@ public:
         return !s;
     }
 
-    inline const size_t magn() const {
-        return m.size() - d;
-    }
-
-    inline const size_t frac() const {
-        return d;
-    }
-
     // answer -1 if lhs < rhs, 0 if lhs == rhs, and 1 if lhs > rhs
     int compare(const bigly& rhs) const;
 
@@ -129,6 +122,8 @@ public:
     inline digit_t& operator[](size_t index) {
         return m[index];
     }
+
+    bigly& operator=(const bigly& o);
 
     bigly& operator++();
     bigly operator++(int);
@@ -166,12 +161,47 @@ public:
     static bigly fibonacci(size_t n);
 
 public: //FIXME: protected
-    void append(const digit_t digit);
-    void prepend(const digit_t digit);
-    void appfrac(const digit_t digit);
-    void prefrac(const digit_t digit);
-    void truncate(size_t cnt);
-    void reverse();
+    void resize();
+
+    void insert(size_t where, digit_t what);
+
+    void minsert(signed char what) {
+        insert(d, what);
+    }
+
+    void finsert(signed char what) {
+        insert(0, what);
+        d++;
+    }
+
+    // insert digit to end of mantissa
+    void mpush_back(signed char what) {
+        insert(d, what);
+    }
+
+    // insert digit to front of mantissa
+    void mpush_front(signed char what) {
+        insert(c, what);
+    }
+
+    // remove digit from front of mantissas
+    void mpop_front() {
+        if ( mant() ) {
+            c--;
+        }
+    }
+
+    // insert digit to end of fraction
+    void fpush_back(signed char what) {
+        insert(0, what);
+        d++;
+    }
+
+    // insert digit to front of fraction
+    void fpush_front(signed char what) {
+        insert(d, what);
+        d++;
+    }
 
 public:
     static bigly ONE;

@@ -15,9 +15,24 @@ bigly bigly::ZERO(0x00);
 
 bigly::bigly() 
 : s(POS)
+, c(0)
 , d(0)
+, b(1)
+, z(BLOCK_SIZE)
 {
-    m.clear();
+    m = new digit_t[BLOCK_SIZE];
+    std::memset(m, 0x00, BLOCK_SIZE);
+}
+
+bigly::bigly(const bigly& o) 
+: bigly()
+{
+    s = o.s;
+    c = o.c;
+    d = o.d;
+    b = o.b;
+    z = o.z;
+    std::memcpy(m, o.m, z);
 }
 
 bigly::bigly(const int64_t val) 
@@ -30,7 +45,7 @@ bigly::bigly(const int64_t val)
             wrk = -wrk;
         }
         while ( wrk ) {
-            append( wrk % 10 );
+            mpush_back( wrk % 10 );
             wrk /= 10;
         }
     }
@@ -58,9 +73,8 @@ bigly::bigly(std::string num)
         s = (sign_t)(*itr++ == '-');
         signFound = true;
     }
-    m.clear();
     while ( itr != num.end() && std::isdigit(*itr)) {
-        prepend(*itr++ - '0');
+        mpush_back(*itr++ - '0');
     }
     // check for trailing sign - if next char is '-' or '+' then set s accordingly
     if (itr != num.end() && !signFound && (*itr == '-' || *itr == '+')) {
@@ -73,117 +87,47 @@ bigly::bigly(const int64_t mant, const int64_t frac)
 {
 }
 
-// iterators
-// two contexts - mantiassa and fraction
-// mantissa is from advance(begin(), d)..end()
-// fraction is begin()..advance(begin(), d-1)
-// if d is zero then no fraction.
-std::vector<bigly::digit_t>::iterator bigly::begin() {
-    auto ret = m.begin();
-    if ( d ) {
-        std::advance(ret, d);
+bigly::~bigly() {
+    if ( m ) 
+        delete [] m;
+    m = nullptr;
+    c = 0;
+}
+
+void bigly::resize() {
+    b++;
+    size_t new_z = BLOCK_SIZE * b;
+    digit_t *q = new digit_t[new_z];
+    std::memset(q, 0x00, new_z);
+    std::memcpy(q, m, z);
+    delete [] m;
+    m = q;
+    z = new_z;
+}
+
+void bigly::insert(size_t where, digit_t what) {
+    // is there room in the buffer?
+    // if not - expand the buffer!
+    // TODO: buffer needs to be dynamic memory
+    if ( c == z ) {
+        resize();
     }
-    return ret;
-}
 
-std::vector<bigly::digit_t>::iterator bigly::end() {
-    return m.end(); 
-}
-
-std::vector<bigly::digit_t>::reverse_iterator bigly::rbegin() {
-    auto ret = m.rbegin();
-    if ( d ) {
-        std::advance(ret, d);
-    }
-    return ret;
-}
-
-std::vector<bigly::digit_t>::reverse_iterator bigly::rend() {
-    return m.rend(); 
-}
-
-std::vector<bigly::digit_t>::const_iterator bigly::cbegin() const {
-    auto ret = m.cbegin();
-    if ( d ) {
-        std::advance(ret, d);
-    }
-    return ret;
-}
-
-std::vector<bigly::digit_t>::const_iterator bigly::cend() const { 
-    return m.cend(); 
-}
-
-std::vector<bigly::digit_t>::const_reverse_iterator bigly::crbegin() const { 
-    auto ret = m.crbegin();
-    if ( d ) {
-        std::advance(ret, d);
-    }
-    return ret;
-}
-
-std::vector<bigly::digit_t>::const_reverse_iterator bigly::crend() const { 
-    return m.crend(); 
-}
-
-// fraction iterators
-std::vector<bigly::digit_t>::iterator bigly::fbegin() { 
-    if ( !d ) return m.end();
-    return m.begin();
-}
-
-std::vector<bigly::digit_t>::iterator bigly::fend() { 
-    if ( !d ) return m.end();
-    auto ret = m.begin();
-    std::advance(ret, d - 1);
-    return ret; 
-}
-
-std::vector<bigly::digit_t>::reverse_iterator bigly::frbegin() { 
-    if ( !d ) return m.rend();
-    return m.rbegin(); 
-}
-
-std::vector<bigly::digit_t>::reverse_iterator bigly::frend() { 
-    if ( !d ) return m.rend();
-    auto ret = m.rbegin();
-    std::advance(ret, d - 1);
-    return ret; 
-}
-
-std::vector<bigly::digit_t>::const_iterator bigly::fcbegin() const { 
-    if ( !d ) return m.cend();
-    return m.cbegin(); 
-}
-
-std::vector<bigly::digit_t>::const_iterator bigly::fcend() const { 
-    if ( !d ) return m.cend();
-    auto ret = m.cbegin();
-    std::advance(ret, d - 1);
-    return ret; 
-}
-
-std::vector<bigly::digit_t>::const_reverse_iterator bigly::fcrbegin() const { 
-    if ( !d ) return m.crend();
-    return m.crbegin(); 
-}
-
-std::vector<bigly::digit_t>::const_reverse_iterator bigly::fcrend() const { 
-    if ( !d ) return m.crend();
-    auto ret = m.crbegin();
-    std::advance(ret, d - 1);
-    return ret; 
+    digit_t *p = m + where;
+    std::memcpy( p + 1, p, z - where - 1 );
+    *p = what;
+    c++;
 }
 
 int bigly::compare(const bigly& rhs) const {
     // lhs has more signifant digits, or lhs positive and rhs negative
-    if ( magn() > rhs.magn() || (magn() > rhs.magn())) return 1;
+    if ( mant() > rhs.mant() || (mant() > rhs.mant())) return 1;
     // rhs has more signifant digits, or lhs negative and rhs positive
-    if ( magn() < rhs.magn() || (magn() < rhs.magn())) return -1;
+    if ( mant() < rhs.mant() || (mant() < rhs.mant())) return -1;
     // lhs and rhs have same sign and number of signifiant digits
-    auto l = crbegin();
-    auto r = rhs.crbegin();
-    while ( l != crend() ) {
+    auto l = begin();
+    auto r = rhs.begin();
+    while ( l != end() ) {
         if ( *l != *r ) {
             int diff = ( *l - *r ) * sign();
             return diff;
@@ -194,8 +138,9 @@ int bigly::compare(const bigly& rhs) const {
 }
 
 bigly& bigly::strip_leading(digit_t dig) {
-    while ( m.begin() != m.end() && dig == m.back() )
-        m.pop_back();
+    auto p = begin();
+    while ( p > m && *p == dig )
+        c--;
     return *this;
 }
 
@@ -221,38 +166,16 @@ bigly bigly::operator--(int) {
     return ret;
 }
 
-// append digit to the end of the number (MSD)
-void bigly::append(const digit_t digit) {
-    m.insert(m.end(), digit);
+bigly& bigly::operator=(const bigly& o) {
+    s = o.s;
+    c = o.c;
+    d = o.d;
+    b = o.b;
+    z = o.z;
+    std::memcpy(m, o.m, z);       
+    return *this;
 }
 
-// insert digit to the beginning of the number (LSD)
-void bigly::prepend(const digit_t digit) {
-    m.insert(m.begin(), digit);
-}
-
-// append frac digit to the end of the fraction
-void bigly::appfrac(const digit_t digit) {
-    m.insert(fend(), digit);
-    d++;
-}
-
-// insert digit to the beginning of the fraction
-void bigly::prefrac(const digit_t digit) {
-    m.insert(fbegin(), digit);
-    d++;
-}
-
-// remove cnt MSD's
-void bigly::truncate(size_t cnt) {
-    while( magn() && cnt-- ) {
-        m.erase(m.end());
-    }
-}
-
-void bigly::reverse() {
-    std::reverse(begin(), end());
-}
 
 bigly bigly::factorial(size_t n) {
     bigly ret = 1;

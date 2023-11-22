@@ -22,16 +22,16 @@ bigly bigly::operator-(const bigly& rhs) const {
         // -a - -b === -a + b === b - a
         return ( negate() - rhs.negate() ).negate();
     }
-    if ( magn() != rhs.magn() ) {
+    if ( mant() != rhs.mant() ) {
         bigly res;
-        if ( magn() > rhs.magn() ) {
+        if ( mant() > rhs.mant() ) {
             res = sub_method_diff_magn(rhs).strip_leading();
         } else {
             res = rhs.sub_method_diff_magn(*this).strip_leading();
         }
         // sign magic - if magn() < rhs.magn()
         // then the sign of the result is inverse of lhs
-        if ( magn() < rhs.magn() ) {
+        if ( mant() < rhs.mant() ) {
             res.s = (sign_t)is_positive();
         }
         return res;
@@ -52,11 +52,11 @@ bigly& bigly::operator-=(const bigly& rhs) {
 bigly bigly::nines_complement(const size_t len) const {
     bigly cmp(*this);  
     int idx(0);  
-    for ( ; idx < magn(); ++idx) {
+    for ( ; idx < mant(); ++idx) {
         cmp[idx] = 9 - cmp[idx];
     }
     for ( ; idx < len; ++idx) {
-        cmp.append(9 - cmp[idx]);
+        cmp.mpush_back(9 - cmp[idx]);
     }
     return cmp;
 }
@@ -65,9 +65,9 @@ bigly bigly::nines_complement(const size_t len) const {
 // 2. Add it to the subtrahend
 // 3. Compute the nines' complement of the result
 bigly bigly::sub_method_one(const bigly& rhs) const {
-    bigly cmp = nines_complement(rhs.magn());
+    bigly cmp = nines_complement(rhs.mant());
     bigly res = cmp + rhs;
-    return res.nines_complement(res.magn());
+    return res.nines_complement(res.mant());
 }
 
 // 1. Compute the nines' complement of the subtrahend
@@ -75,9 +75,9 @@ bigly bigly::sub_method_one(const bigly& rhs) const {
 // 3. Drop the leading '1'
 // 4. Add 1 to the answer.
 bigly bigly::sub_method_two(const bigly& rhs) const {
-    bigly cmp = rhs.nines_complement(rhs.magn());
+    bigly cmp = rhs.nines_complement(rhs.mant());
     bigly res = *this + cmp;
-    res.truncate(1);
+    res.mpop_front();
     // res.b[--res.m] = 0;
     res += bigly::ONE;
     return res;
@@ -88,8 +88,8 @@ bigly bigly::sub_method_two(const bigly& rhs) const {
 // complement is taken.
 bigly bigly::sub_method_diff_magn(const bigly& rhs) const {
     bigly inter(rhs);
-    while(inter.magn() < magn())
-        inter.append(0);
+    while(inter.mant() < mant())
+        inter.mpush_back(0);
     auto res = sub_method_two(inter);
     return res;
 }
