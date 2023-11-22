@@ -22,6 +22,7 @@ AFLAGS := rvs
 
 # garth : garth.cpp garth.h $(HDR) $(LIB_NAME)
 # 	$(CC) $(CFLAGS) garth.cpp -L/usr/lib/x86_64-linux-gnu -L/usr/local/libcf/lib/libcf $(LIB_NAME) -o $@
+all: main
 
 $(LIB_NAME) : $(OBJ)
 	$(ARC) $(AFLAGS) $@ $(OBJ)

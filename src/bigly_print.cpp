@@ -15,17 +15,29 @@ std::ostream& operator<<(std::ostream& os, const bigly& obj) {
     if (obj.sign() < 0 ) {
         os << '-';
     }
-    size_t idx = obj.magn();
-    if ( !idx ) {
+    size_t cnt = obj.magn();
+    if ( !cnt ) {
         os << '0';
     } else {
         auto itr = obj.crbegin();
         while (  itr != obj.crend() ) {
-            if ( !(idx-- % 3) && itr != obj.crbegin() ) {
+            if ( !(cnt-- % 3) && itr != obj.crbegin() ) {
                 os << sep;
             }
             bigly::digit_t ch = ('0' + *itr++);
             os << std::hex << (char)(ch);
+        }
+        cnt = obj.frac();
+        if ( cnt ) {
+            os << dec;
+            auto itr = obj.fcrbegin();
+            while (  itr != obj.fcrend() ) {
+                if ( !(cnt-- % 3) && itr != obj.crbegin() ) {
+                    os << sep;
+                }
+                bigly::digit_t ch = ('0' + *itr++);
+                os << std::hex << (char)(ch);
+            }
         }
     }
     return os;

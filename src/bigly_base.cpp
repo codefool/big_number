@@ -223,7 +223,7 @@ bigly bigly::operator--(int) {
 
 // append digit to the end of the number (MSD)
 void bigly::append(const digit_t digit) {
-    m.push_back(digit);
+    m.insert(m.end(), digit);
 }
 
 // insert digit to the beginning of the number (LSD)
@@ -233,11 +233,13 @@ void bigly::prepend(const digit_t digit) {
 
 // append frac digit to the end of the fraction
 void bigly::appfrac(const digit_t digit) {
+    m.insert(fend(), digit);
     d++;
 }
 
 // insert digit to the beginning of the fraction
 void bigly::prefrac(const digit_t digit) {
+    m.insert(fbegin(), digit);
     d++;
 }
 

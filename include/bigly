@@ -165,7 +165,7 @@ public:
     static bigly factorial(size_t n);
     static bigly fibonacci(size_t n);
 
-private:
+public: //FIXME: protected
     void append(const digit_t digit);
     void prepend(const digit_t digit);
     void appfrac(const digit_t digit);
