@@ -32,7 +32,7 @@ bigly bigly::operator-(const bigly& rhs) const {
         // sign magic - if magn() < rhs.magn()
         // then the sign of the result is inverse of lhs
         if ( mant() < rhs.mant() ) {
-            res.s = (sign_t)is_positive();
+            res.set_sign((sign_t)is_positive());
         }
         return res;
     }
@@ -56,7 +56,7 @@ bigly bigly::nines_complement(const size_t len) const {
         cmp[idx] = 9 - cmp[idx];
     }
     for ( ; idx < len; ++idx) {
-        cmp.mpush_back(9 - cmp[idx]);
+        cmp.mpush_front(9 - cmp[idx]);
     }
     return cmp;
 }

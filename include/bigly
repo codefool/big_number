@@ -30,12 +30,12 @@ public:
     const size_t BLOCK_SIZE = 1024;
 
 private:
-    sign_t   s;  // sign - true negative, false positive
-    size_t   c;  // no. digits used in m
-    size_t   d;  // no. of fractional digits
-    size_t   b;  // block count
-    size_t   z;  // size of m
-    digit_t *m;  // buffer with mantissa
+    sign_t   _sign;   // sign - true negative, false positive
+    size_t   _len;    // no. digits used in m
+    size_t   _frac;   // no. of fractional digits
+    size_t   _blkcnt; // block count
+    size_t   _size;   // size of m
+    digit_t *_m;      // buffer with mantissa
 
 public:
     bigly();
@@ -54,46 +54,46 @@ public:
     //        |  +-- fbegin
     //        +-- fend  
 
-    const signed char *end()    const { return m + c - 1; }
-    const signed char *begin()  const { return m; }
+    const signed char *end()    const { return _m + _len - 1; }
+    const signed char *begin()  const { return _m; }
     const signed char *mend()   const { return end(); }
-    const signed char *mbegin() const { return m + d; }
-    const signed char *fend()   const { return m + d - 1; }
+    const signed char *mbegin() const { return _m + _frac; }
+    const signed char *fend()   const { return _m + _frac - 1; }
     const signed char *fbegin() const { return begin(); }
 
-    size_t mant() const { return c - d; }
-    size_t frac() const { return d; }
+    size_t mant() const { return _len - _frac; }
+    size_t frac() const { return _frac; }
 
     bool is_zero() {
-        return c == 0;
+        return _len == 0;
     }
 
     inline int sign() const {
-        return s ? -1 : 1;
+        return _sign ? -1 : 1;
     }
 
     bigly abs() const {
         bigly ret(*this);
-        ret.s = POS;
+        ret._sign = POS;
         return ret;
     }
 
     bigly negate() const {
         auto ret(*this);
-        ret.s = (sign_t)(!s);
+        ret._sign = (sign_t)(!_sign);
         return ret;
     }
 
-    void set_sign(sign_t t) {
-        s = t;
+    void set_sign(sign_t s) {
+        _sign = s;
     }
 
     bool is_negative() const {
-        return s;
+        return _sign;
     }
 
     bool is_positive() const {
-        return !s;
+        return !_sign;
     }
 
     // answer -1 if lhs < rhs, 0 if lhs == rhs, and 1 if lhs > rhs
@@ -120,7 +120,7 @@ public:
     }
 
     inline digit_t& operator[](size_t index) {
-        return m[index];
+        return _m[index];
     }
 
     bigly& operator=(const bigly& o);
@@ -166,41 +166,40 @@ public: //FIXME: protected
     void insert(size_t where, digit_t what);
 
     void minsert(signed char what) {
-        insert(d, what);
+        insert(_frac, what);
     }
 
     void finsert(signed char what) {
         insert(0, what);
-        d++;
+        _frac++;
     }
 
     // insert digit to end of mantissa
     void mpush_back(signed char what) {
-        insert(d, what);
+        insert(_frac, what);
     }
 
     // insert digit to front of mantissa
     void mpush_front(signed char what) {
-        insert(c, what);
+        insert(_len, what);
     }
 
     // remove digit from front of mantissas
     void mpop_front() {
         if ( mant() ) {
-            c--;
+            _len--;
         }
     }
 
     // insert digit to end of fraction
     void fpush_back(signed char what) {
         insert(0, what);
-        d++;
+        _frac++;
     }
 
     // insert digit to front of fraction
     void fpush_front(signed char what) {
-        insert(d, what);
-        d++;
+        insert(_frac++, what);
     }
 
 public:

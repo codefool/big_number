@@ -14,25 +14,25 @@ bigly bigly::ONE(0x01);
 bigly bigly::ZERO(0x00);
 
 bigly::bigly() 
-: s(POS)
-, c(0)
-, d(0)
-, b(1)
-, z(BLOCK_SIZE)
+: _sign(POS)
+, _len(0)
+, _frac(0)
+, _blkcnt(1)
+, _size(BLOCK_SIZE)
 {
-    m = new digit_t[BLOCK_SIZE];
-    std::memset(m, 0x00, BLOCK_SIZE);
+    _m = new digit_t[BLOCK_SIZE];
+    std::memset(_m, 0x00, BLOCK_SIZE);
 }
 
 bigly::bigly(const bigly& o) 
 : bigly()
 {
-    s = o.s;
-    c = o.c;
-    d = o.d;
-    b = o.b;
-    z = o.z;
-    std::memcpy(m, o.m, z);
+    _sign   = o._sign;
+    _len    = o._len;
+    _frac   = o._frac;
+    _blkcnt = o._blkcnt;
+    _size   = o._size;
+    std::memcpy(_m, o._m, _size);
 }
 
 bigly::bigly(const int64_t val) 
@@ -41,7 +41,7 @@ bigly::bigly(const int64_t val)
     if ( val != 0 ) {
         int64_t wrk = val;
         if ( wrk < 0 ) {
-            s = NEG;
+            _sign = NEG;
             wrk = -wrk;
         }
         while ( wrk ) {
@@ -70,7 +70,7 @@ bigly::bigly(std::string num)
     // check for leading sign - if first char is '-' or '+' then set s accordingly
     bool signFound = false;
     if (*itr == '-' || *itr == '+') {
-        s = (sign_t)(*itr++ == '-');
+        _sign = (sign_t)(*itr++ == '-');
         signFound = true;
     }
     while ( itr != num.end() && std::isdigit(*itr)) {
@@ -78,7 +78,7 @@ bigly::bigly(std::string num)
     }
     // check for trailing sign - if next char is '-' or '+' then set s accordingly
     if (itr != num.end() && !signFound && (*itr == '-' || *itr == '+')) {
-        s = (sign_t)(*itr == '-');
+        _sign = (sign_t)(*itr == '-');
     }
 }
 
@@ -88,35 +88,36 @@ bigly::bigly(const int64_t mant, const int64_t frac)
 }
 
 bigly::~bigly() {
-    if ( m ) 
-        delete [] m;
-    m = nullptr;
-    c = 0;
+    if ( _m ) 
+        delete [] _m;
+    _m = nullptr;
+    _size = 0;
+    _blkcnt = 0;
 }
 
 void bigly::resize() {
-    b++;
-    size_t new_z = BLOCK_SIZE * b;
+    _blkcnt++;
+    size_t new_z = BLOCK_SIZE * _blkcnt;
     digit_t *q = new digit_t[new_z];
     std::memset(q, 0x00, new_z);
-    std::memcpy(q, m, z);
-    delete [] m;
-    m = q;
-    z = new_z;
+    std::memcpy(q, _m, _size);
+    delete [] _m;
+    _m = q;
+    _size = new_z;
 }
 
 void bigly::insert(size_t where, digit_t what) {
     // is there room in the buffer?
     // if not - expand the buffer!
     // TODO: buffer needs to be dynamic memory
-    if ( c == z ) {
+    if ( _len == _size ) {
         resize();
     }
 
-    digit_t *p = m + where;
-    std::memcpy( p + 1, p, z - where - 1 );
+    digit_t *p = _m + where;
+    std::memcpy( p + 1, p, _size - where - 1 );
     *p = what;
-    c++;
+    _len++;
 }
 
 int bigly::compare(const bigly& rhs) const {
@@ -139,8 +140,8 @@ int bigly::compare(const bigly& rhs) const {
 
 bigly& bigly::strip_leading(digit_t dig) {
     auto p = begin();
-    while ( p > m && *p == dig )
-        c--;
+    while ( p > _m && *p == dig )
+        _len--;
     return *this;
 }
 
@@ -167,12 +168,12 @@ bigly bigly::operator--(int) {
 }
 
 bigly& bigly::operator=(const bigly& o) {
-    s = o.s;
-    c = o.c;
-    d = o.d;
-    b = o.b;
-    z = o.z;
-    std::memcpy(m, o.m, z);       
+    _sign   = o._sign;
+    _len    = o._len;
+    _frac   = o._frac;
+    _blkcnt = o._blkcnt;
+    _size   = o._size;
+    std::memcpy(_m, o._m, _size);       
     return *this;
 }
 
