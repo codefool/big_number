@@ -2,7 +2,7 @@
 
 int main(int argc, char **argv) {
     if ( argc < 3 ) {
-        std::cout << "main lhs op rhs" << std::endl;
+        std::cout << "main [-d] lhs op rhs" << std::endl;
         exit(1);
     }
 

@@ -40,16 +40,17 @@ bigly bigly::add(const bigly& rhs) const {
     auto b = rhs.mbegin();
     // take a digit from each addend, add then together, then
     // sum = d
+    std::cout << *this << ' ' << rhs << std::endl;
     size_t len = std::max(mant(), rhs.mant());
     for ( size_t idx(0); idx < len; ++idx ) {
         l = (idx < mant())     ? *a++ : 0;
         r = (idx < rhs.mant()) ? *b++ : 0;
         digit = l + r + carry;
-        sum.mpush_front(digit % 10);
+        sum.mpush_back(digit % 10);
         carry = digit / 10;
     }
     if (carry) {
-        sum.mpush_front(carry);
+        sum.mpush_back(carry);
     }
     return sum;
 }

@@ -45,7 +45,7 @@ bigly::bigly(const int64_t val)
             wrk = -wrk;
         }
         while ( wrk ) {
-            mpush_back( wrk % 10 );
+            mpush_front( wrk % 10 );
             wrk /= 10;
         }
     }
@@ -56,6 +56,19 @@ bigly::bigly(const int64_t val)
 // - leading zeros are ignored (removed)
 // - the remaining digits are the significant digit count
 // - the number is then loaded into the buffer LSD first
+//
+// (+|-)?[0-9]*((\.)[0-9]*))?(+|-)?
+//
+// 1. Looking for [0-9+-.]          123 +123 -123 .123
+//    - 0-9 -> 2
+//    - +-  -> 3
+//    - .   -> 4
+// 2. Collecting mantissa. Looking for [0-9+-.]
+//    - 0-9 -> 2
+// 3. Set sign. Looking for [0-9.]
+//    0-9 -> 2
+// 4. Collecting fraction. Looking for [0-9+-]
+//
 bigly::bigly(std::string num) 
 : bigly()
 {
@@ -74,7 +87,7 @@ bigly::bigly(std::string num)
         signFound = true;
     }
     while ( itr != num.end() && std::isdigit(*itr)) {
-        mpush_back(*itr++ - '0');
+        mpush_front(*itr++ - '0');
     }
     // check for trailing sign - if next char is '-' or '+' then set s accordingly
     if (itr != num.end() && !signFound && (*itr == '-' || *itr == '+')) {
@@ -128,7 +141,7 @@ int bigly::compare(const bigly& rhs) const {
     // lhs and rhs have same sign and number of signifiant digits
     auto l = begin();
     auto r = rhs.begin();
-    while ( l != end() ) {
+    while ( l <= end() ) {
         if ( *l != *r ) {
             int diff = ( *l - *r ) * sign();
             return diff;
@@ -139,8 +152,8 @@ int bigly::compare(const bigly& rhs) const {
 }
 
 bigly& bigly::strip_leading(digit_t dig) {
-    auto p = begin();
-    while ( p > _m && *p == dig )
+    auto p = end();
+    while ( p > _m && *p-- == dig )
         _len--;
     return *this;
 }

@@ -54,12 +54,12 @@ public:
     //        |  +-- fbegin
     //        +-- fend  
 
-    const signed char *end()    const { return _m + _len - 1; }
     const signed char *begin()  const { return _m; }
-    const signed char *mend()   const { return end(); }
+    const signed char *end()    const { return _m + _len - 1; }
     const signed char *mbegin() const { return _m + _frac; }
-    const signed char *fend()   const { return _m + _frac - 1; }
+    const signed char *mend()   const { return end(); }
     const signed char *fbegin() const { return begin(); }
+    const signed char *fend()   const { return _m + _frac - 1; }
 
     size_t mant() const { return _len - _frac; }
     size_t frac() const { return _frac; }
@@ -174,31 +174,31 @@ public: //FIXME: protected
         _frac++;
     }
 
-    // insert digit to end of mantissa
-    void mpush_back(signed char what) {
+    // insert digit to front of mantissa
+    void mpush_front(signed char what) {
         insert(_frac, what);
     }
 
-    // insert digit to front of mantissa
-    void mpush_front(signed char what) {
+    // insert digit to back of mantissa
+    void mpush_back(signed char what) {
         insert(_len, what);
     }
 
     // remove digit from front of mantissas
-    void mpop_front() {
+    void mpop_back() {
         if ( mant() ) {
-            _len--;
+            (*this)[--_len] = 0;
         }
-    }
-
-    // insert digit to end of fraction
-    void fpush_back(signed char what) {
-        insert(0, what);
-        _frac++;
     }
 
     // insert digit to front of fraction
     void fpush_front(signed char what) {
+        insert(0, what);
+        _frac++;
+    }
+
+    // insert digit to back of fraction
+    void fpush_back(signed char what) {
         insert(_frac++, what);
     }
 

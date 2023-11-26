@@ -11,33 +11,39 @@
 namespace cflib {
 // subtract two positive numbers using complement method
 bigly bigly::operator-(const bigly& rhs) const {
-    if ( *this == rhs ) {
+    const bigly& lhs = *this;
+    if ( lhs == rhs ) {
         return bigly::ZERO;
     }
-    if ( is_negative() ) { 
+    if ( lhs.is_negative() ) { 
         if ( rhs.is_positive() ) {
             // -a - b === -(a + b)
-            return ( negate() + rhs ).negate();
+            return ( lhs.negate() + rhs ).negate();
         }
         // -a - -b === -a + b === b - a
-        return ( negate() - rhs.negate() ).negate();
+        return ( lhs.negate() - rhs.negate() ).negate();
+    }
+    // lhs is positive
+    if ( rhs.is_negative() ) {
+        // a - -b = a + b
+        return lhs + rhs.negate();
+    } else if( lhs < rhs ) {
+        // if a < b, then a - b = -(b-a)
+        return ( rhs - *this ).negate();
     }
     if ( mant() != rhs.mant() ) {
-        bigly res;
-        if ( mant() > rhs.mant() ) {
-            res = sub_method_diff_magn(rhs).strip_leading();
-        } else {
-            res = rhs.sub_method_diff_magn(*this).strip_leading();
-        }
-        // sign magic - if magn() < rhs.magn()
-        // then the sign of the result is inverse of lhs
+        bigly res = ( mant() > rhs.mant() )
+                  ? lhs.sub_method_diff_magn(rhs).strip_leading()
+                  : rhs.sub_method_diff_magn(lhs).strip_leading();
+
+        // sign magic - if magn() < rhs.magn() then res is negative
         if ( mant() < rhs.mant() ) {
-            res.set_sign((sign_t)is_positive());
+            res.set_sign(NEG);
         }
         return res;
     }
 
-    return sub_method_one(rhs).strip_leading();
+    return lhs.sub_method_one(rhs).strip_leading();
 }
 
 bigly& bigly::operator-=(const bigly& rhs) {
@@ -51,13 +57,15 @@ bigly& bigly::operator-=(const bigly& rhs) {
 //
 bigly bigly::nines_complement(const size_t len) const {
     bigly cmp(*this);  
+    std::cout << "b9c " << cmp << std::endl;
     int idx(0);  
     for ( ; idx < mant(); ++idx) {
         cmp[idx] = 9 - cmp[idx];
     }
     for ( ; idx < len; ++idx) {
-        cmp.mpush_front(9 - cmp[idx]);
+        cmp.mpush_back(9);
     }
+    std::cout << "a9c " << cmp << std::endl;
     return cmp;
 }
 
@@ -66,20 +74,29 @@ bigly bigly::nines_complement(const size_t len) const {
 // 3. Compute the nines' complement of the result
 bigly bigly::sub_method_one(const bigly& rhs) const {
     bigly cmp = nines_complement(rhs.mant());
+    std::cout << *this << ' ' << cmp << ' ' << rhs << std::endl;
     bigly res = cmp + rhs;
-    return res.nines_complement(res.mant());
+    std::cout << cmp << ' ' << rhs << std::endl;
+    cmp = res.nines_complement(res.mant());
+    std::cout << *this << ' ' << cmp << std::endl;
+    return cmp;
 }
 
 // 1. Compute the nines' complement of the subtrahend
 // 2. Add it to the minuend
 // 3. Drop the leading '1'
 // 4. Add 1 to the answer.
+// 5. Strip leading zeros
 bigly bigly::sub_method_two(const bigly& rhs) const {
     bigly cmp = rhs.nines_complement(rhs.mant());
+    std::cout << *this << ' ' << cmp << std::endl;
     bigly res = *this + cmp;
-    res.mpop_front();
-    // res.b[--res.m] = 0;
+    std::cout << "a " << res << std::endl;
+    res.mpop_back();
+    std::cout << "b " << res << std::endl;
     res += bigly::ONE;
+    std::cout << "c " << res << std::endl;
+    res.strip_leading(0);
     return res;
 }
 
