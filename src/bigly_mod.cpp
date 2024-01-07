@@ -38,17 +38,17 @@ bigly bigly::int_division(const bigly& den, bigly& rem) const {
     digit_t cnt;
     // const digit_t *p = c_get_msd();
     auto p = mend();
-    while ( p != mbegin() ) {
-        div.mpush_back(*p--);
+    while ( p >= mbegin() ) {
+        div.mpush_front(*p--);
         if ( div < den ) {
-            quot.mpush_back(0);
+            quot.mpush_front(0);
         } else {
             cnt = 0;
             while ( div >= den ) {
                 cnt++;
                 div -= den;
             }
-            quot.mpush_back(cnt);
+            quot.mpush_front(cnt);
             rem = div;
         }
     }
@@ -58,7 +58,7 @@ bigly bigly::int_division(const bigly& den, bigly& rem) const {
             cnt++;
             div -= den;
         } while ( div >= den );
-        quot.mpush_back(cnt);
+        quot.mpush_front(cnt);
         rem = div;
     }
 
