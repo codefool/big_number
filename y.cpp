@@ -12,15 +12,22 @@ enum Sign : bool {
     SIGN_NEG = true,
 };
 
+#define TO_CHAR(b) (char)(b + '0')
+#define FROM_CHAR(c) (digit_t)(c - '0')
+
 struct numb {
-    Sign    s;
-    digit_t b[SIZE];
-    numb();
+    Sign     s;
+    size_t   sz;
+    digit_t *b;
+    numb(size_t size = SIZE, Sign s = SIGN_POS);
     numb(const numb& oth);
     numb(const std::string& val);
     numb(const int64_t val);
+    ~numb();
 
     size_t width() const;
+
+    void resize(size_t new_size);
 
     numb& nines();
     numb& operator=(const numb& rhs);
@@ -30,24 +37,25 @@ struct numb {
     numb operator*(const numb& rhs) const;
     digit_t add(const digit_t d);
 
+    digit_t fill() const {return (s) ? '9' : '0';}
     friend std::ostream& operator<<(std::ostream& os, const numb& n);
 };
 
-numb::numb()
-: s(SIGN_POS)
+numb::numb(size_t size, Sign s)
+: s(s), sz(size)
 {
-    std::memset(b, 0x00, SIZE);
+    b = new digit_t[sz]{};
+    std::memset(b, fill(), sz);
 }
 
 numb::numb(const numb& oth)
-: numb()
+: numb(oth.sz, oth.s)
 {
-    s = oth.s;
-    std::memcpy(b, oth.b, SIZE);
+    std::memcpy(b, oth.b, oth.sz);
 }
 
 numb::numb(const std::string& val) 
-:numb()
+:numb(val.length())
 {
     bool coll_frac = true;
     signed char *p = b;
@@ -55,7 +63,7 @@ numb::numb(const std::string& val)
     for( auto itr = val.rbegin(); itr != val.rend(); ++itr ) {
         signed char c = *itr;
         if ( std::isdigit(c) ) {
-            *p++ = c - '0';
+            *p++ = FROM_CHAR(c);
         } else if ( c == '+' || c == '-' ) {
             s = (Sign)(c == '-'); // SIGN_NEG
         }
@@ -81,34 +89,53 @@ numb::numb(const int64_t val)
         nines();
 }
 
+numb::~numb() {
+    if ( b != nullptr )
+        delete [] b;
+    b = nullptr;
+    sz = 0;
+}
+
 size_t numb::width() const {
     // for negative numbers, we ignore leading 9, else leading 0
     digit_t test = (s) ? 9 : 0;
-    for( size_t ret = SIZE; ret > 0; --ret )
+    for( size_t ret = sz; ret > 0; --ret )
         if ( b[ret - 1] != test )
             return ret;
     return 0;
 }
 
+void numb::resize(size_t new_size) {
+    if ( new_size > sz ) {
+        digit_t *p = new digit_t[new_size]{};
+        std::memset(p, fill(), new_size);
+        std::memcpy(p, b, sz);
+        delete [] b;
+        b = p;
+        sz = new_size;
+    }
+}
+
 numb& numb::nines() {
-    for( size_t n = 0; n < SIZE; n++)
+    for( size_t n = 0; n < sz; n++)
         b[n] = (digit_t)(9 - b[n]);
     return *this;
 }
 
 numb& numb::operator=(const numb& rhs) {
     s = rhs.s;
-    std::memcpy(b, rhs.b, SIZE);
+    resize(rhs.sz);
+    std::memcpy(b, rhs.b, rhs.sz);
     return *this;
 }
 
 numb numb::operator+(const numb& rhs) const {
-    numb res;
+    numb res(std::max(width(),rhs.width()) + 1);
     digit_t carry = 0;
     const digit_t *p = b;
     const digit_t *q = rhs.b;
     digit_t *r = res.b;
-    for ( int i = 0; i < SIZE; i++ ) {
+    for ( int i = 0; i < sz; i++ ) {
         digit_t sum = *p++ + *q++ + carry;
         *r++  = sum % 10;
         carry = sum / 10;
@@ -145,7 +172,7 @@ numb numb::operator-(const numb& rhs) const {
 digit_t numb::add(const digit_t d) {
     digit_t carry = d;
     digit_t *r = b;
-    for ( int i = 0; i < SIZE; i++ ) {
+    for ( int i = 0; i < sz; i++ ) {
         digit_t sum = *r + carry;
         *r++  = sum % 10;
         carry = sum / 10;
@@ -154,20 +181,29 @@ digit_t numb::add(const digit_t d) {
 }
 
 numb numb::operator*(const numb& rhs) const {
-    numb res;
+    size_t prod_sz = sz + rhs.sz;
+    numb res(prod_sz);
     numb ls = *this;
     numb rs = rhs;
-    if ( ls.s ) 
+    Sign lsgn = ls.s;
+    Sign rsgn = rs.s;
+    if ( ls.s ) {
         ls.nines();
-    if ( rs.s )
+        ls.s = SIGN_POS;
+    }
+    if ( rs.s ) {
         rs.nines();
+        rs.s = SIGN_POS;
+    }
     size_t lw = ls.width();
     size_t rw = rs.width();
     digit_t carry = 0;
     const digit_t *p = ls.b;
     for ( int i = 0; i < lw; i++ ) {
-        numb cum;
+        numb cum(prod_sz);
         digit_t u = *p++;
+        if ( u == 0 ) 
+            continue;
         const digit_t *q = rs.b;
         digit_t *c = cum.b + i;
         size_t j = rw;
@@ -175,14 +211,19 @@ numb numb::operator*(const numb& rhs) const {
             digit_t prod = (u * *q++) + carry;
             *c++  = prod % 10;
             carry = prod / 10;
-            assert( c - cum.b < SIZE );
+            assert( 0 <= prod && prod <= 99 );
+            assert( c - cum.b < cum.sz );
         }
         *c = carry;
         res += cum;
+        std::cout << TO_CHAR(u) << " " << cum << " " << res.sz << std::endl;
+        std::cout << "= " << res << std::endl;
     }
-    if ( ls.s ^ rs.s ) {
+    std::cout << res << std::endl;
+    if ( lsgn ^ rsgn ) {
         res.nines();
         res.s = SIGN_NEG;
+        std::cout << res << std::endl;
     }
     return res;
 }
@@ -205,7 +246,7 @@ std::ostream& operator<<(std::ostream& os, const numb& n) {
                 os << sign;
                 sign = 0;
             }
-            os << (char)(ch + '0');
+            os << TO_CHAR(ch);
             if ( ch != 0 )
                 nonzero = true;
             cnt++;
@@ -221,21 +262,21 @@ int main() {
     numb b("89734958725098275203985723059822304958724");
     numb c = a + b;
 
-    std::cout << a << std::endl;
-    std::cout << b << std::endl;
-    std::cout << c << std::endl;
+    std::cout << "a     " << a << std::endl;
+    std::cout << "b     " << b << std::endl;
+    std::cout << "a + b " << c << std::endl;
 
     c = b + a;
-    std::cout << c << std::endl;
+    std::cout << "b + a " << c << std::endl;
 
     c = a - b;
-    std::cout << c << std::endl;
+    std::cout << "a - b " << c << std::endl;
 
     c = b - a;
-    std::cout << c << std::endl;
+    std::cout << "b - a " << c << std::endl;
 
     c = a * b;
-    std::cout << c << std::endl;
+    std::cout << "a * b " << c << std::endl;
 
     return 0;
 }

@@ -46,3 +46,6 @@ x: x.cpp
 
 y: y.cpp
 	$(CC) $(CFLAGS) y.cpp -L/usr/lib/x86_64-linux-gnu -o y	
+
+z: z.cpp
+	$(CC) $(CFLAGS) z.cpp -L/usr/lib/x86_64-linux-gnu -o z
