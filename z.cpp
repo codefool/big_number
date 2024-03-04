@@ -82,11 +82,11 @@ struct numb {
         return *this;
     }
 
-    bool abs() {
+    bool abs(bool sign) {
         bool org_s = s;
-        if( s ) {
+        if( s != sign ) {
             nines();
-            s = SIGN_POS;
+            s = sign;
         }
         return org_s;
     }
@@ -165,6 +165,29 @@ struct tuple {
         rhs = std::make_unique<numb>(r, sz);
     }
 
+    int compare() {
+        numb& pl = *(lhs.get());
+        numb& pr = *(rhs.get());
+        if( pl.s != pr.s ) {        // if signs don't match
+            if( pl.s ) return -1;   // lhs neg ==> lhs < rhs
+            return 1;               // else lhs > rhs
+        }
+        bool  lsgn = pl.abs(SIGN_POS);
+        bool  rsgn = pr.abs(SIGN_POS);
+        std::cout << pl << std::endl;
+        std::cout << pr << std::endl;
+        const digit *p = pl.get() + pl.size() - 1;
+        const digit *q = pr.get() + pl.size() - 1;
+        size_t sz = pl.size();
+        for( size_t c(0); c < pl.size(); ++c, --p, --q ) {
+            if( *p < *q )
+                return (int)(*p - *q);
+        }
+        pl.abs(lsgn);
+        pr.abs(rsgn);
+        return 0;   // get here if equal
+    }
+
     numb add() {
         // for add/subtract operations, the result will be (at most)
         // n+1 digits long, where n is the common length of lhs/rhs.
@@ -203,8 +226,8 @@ struct tuple {
         // lhs.size() + rhs.size() digits wide
         numb& pl = *(lhs.get());
         numb& pr = *(rhs.get());
-        bool  lsgn = pl.abs();
-        bool  rsgn = pr.abs();
+        bool  lsgn = pl.abs(SIGN_POS);
+        bool  rsgn = pr.abs(SIGN_POS);
         numb result(pl.size() + pr.size());
         size_t sz = pl.size();
         const digit *p = pl.get();
@@ -231,6 +254,8 @@ struct tuple {
             result.nines();
             result.s = SIGN_NEG;
         }
+        pl.abs(lsgn);
+        pr.abs(rsgn);
         return result;
     }
 };
@@ -243,5 +268,8 @@ int main() {
     tuple t(a,b);
     numb c = t.mult();
     std::cout << c << std::endl;
+    std::cout << *(t.lhs.get()) << std::endl;
+    std::cout << *(t.rhs.get()) << std::endl;
+    std::cout << t.compare() << std::endl;
     return 0;
 }
