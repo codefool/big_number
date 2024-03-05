@@ -40,3 +40,6 @@ clean:
 
 main: main.cpp build-ver $(HDR) $(LIB_NAME)
 	$(CC) $(CFLAGS) main.cpp -I. -L/usr/lib/x86_64-linux-gnu $(OBJ) $(LIB_NAME) -o main
+
+z: z.cpp
+	$(CC) $(CFLAGS) z.cpp -L/usr/lib/x86_64-linux-gnu -o z
