@@ -94,14 +94,17 @@ struct numb {
     }
 
     inline digit *get() { return n.get(); }
-    inline size_t size() const {return n.size();}
+    inline size_t size() const { return n.size(); }
+
+    static numb factorial(uint64_t n);
+
     friend std::ostream& operator<<(std::ostream& os, const numb& n);
 };
 
 typedef std::unique_ptr<numb> numb_ptr;
 
-numb::numb(const std::string& val) 
-: s(false)
+numb::numb(const std::string& val, size_t size) 
+: s(SIGN_POS)
 {
     bool coll_frac = true;
     buff q(val.length(), FILL_POS);
@@ -120,11 +123,30 @@ numb::numb(const std::string& val)
         }
     }
     // now setup our local buffer
-    n.init(cnt, fill(s), &q);
+    n.init(std::max(cnt,size), fill(s), &q);
     if ( s )
         nines();
 }
 
+numb::numb(const int64_t val, size_t size)
+: s(SIGN_POS)
+{
+    int64_t v = val;
+    if( v < 0 ) {
+        s = SIGN_NEG;
+        v = -v;
+    }
+    std::string num;
+    while( v ) {
+        digit d = v % 10;
+        v = v / 10;
+        num.push_back(d);
+    }
+    n.init(std::max(size,num.length()),fill(s));
+    std::memcpy(n.get(), num.c_str(), num.length());
+    if ( s )
+        nines();
+}
 
 std::ostream& operator<<(std::ostream& os, const numb& n) {
     bool   nonzero = false;
@@ -196,7 +218,7 @@ struct tuple {
         numb& pl = *(lhs.get());
         numb& pr = *(rhs.get());
         size_t sz = pl.size();
-        numb result(pl.size() + 1);
+        numb result(0, pl.size() + 1);
         digit carry = 0;
         const digit *p = pl.get();
         const digit *q = pr.get();
@@ -237,7 +259,7 @@ struct tuple {
         for( size_t lcnt = 0; lcnt < sz; ++lcnt ) {
             digit carry = 0;
             digit d = *p++;
-            numb accum(pl.size() + pr.size());
+            numb accum(0, pl.size() + pr.size());
             // shift result left lcnt digits
             digit *acc = accum.get() + lcnt;
             // multiply by each digit of rhs
@@ -262,6 +284,15 @@ struct tuple {
     }
 };
 
+numb numb::factorial(uint64_t n) {
+    numb acc(1L);
+    for(; n > 1; --n ) {
+        tuple t(acc, numb(n));
+        acc = t.mult();
+    }
+    return acc;
+}
+
 int main() {
     numb a("34359738368");
     std::cout << a << std::endl;
@@ -269,9 +300,20 @@ int main() {
     std::cout << b << std::endl;
     tuple t(a,b);
     numb c = t.mult();
-    std::cout << c << std::endl;
+    std::cout << t.add() << std::endl;
+    std::cout << t.mult() << std::endl;
     std::cout << *(t.lhs.get()) << std::endl;
     std::cout << *(t.rhs.get()) << std::endl;
     std::cout << t.compare() << std::endl;
+
+    numb d(34359738368);
+    numb e(4398046511104);
+    tuple u(d,e);
+    std::cout << d << std::endl;
+    std::cout << e << std::endl;
+    std::cout << u.add() << std::endl;
+    std::cout << u.mult() << std::endl;
+    std::cout << numb::factorial(5) << std::endl;
+
     return 0;
 }
