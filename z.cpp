@@ -98,8 +98,28 @@ struct numb {
 
     static numb factorial(uint64_t n);
 
+    bool operator==(const numb& rhs) const;
+    bool operator<(const numb& rhs) const;
+    bool operator>(const numb& rhs) const;
+    bool operator<=(const numb& rhs) const;
+    bool operator>=(const numb& rhs) const;
+
+    numb  operator+ (const numb& rhs) const;
+    numb  operator- (const numb& rhs) const;
+    numb  operator* (const numb& rhs) const;
+    numb  operator% (const numb& rhs) const;
+    numb& operator+=(const numb& rhs);
+    numb& operator-=(const numb& rhs);
+    numb& operator*=(const numb& rhs);
+
     friend std::ostream& operator<<(std::ostream& os, const numb& n);
+public:
+    static numb ZERO;    
+    static numb ONE;    
 };
+
+numb numb::ZERO(0L,0);
+numb numb::ONE(1L,0);
 
 typedef std::unique_ptr<numb> numb_ptr;
 
@@ -189,6 +209,9 @@ struct tuple {
         rhs = std::make_unique<numb>(r, sz);
     }
 
+    numb& l() { return *(lhs.get());}
+    numb& r() { return *(rhs.get());}
+
     int compare() {
         numb& pl = *(lhs.get());
         numb& pr = *(rhs.get());
@@ -204,7 +227,7 @@ struct tuple {
         const digit *q = pr.get() + pl.size() - 1;
         size_t sz = pl.size();
         for( size_t c(0); c < pl.size(); ++c, --p, --q ) {
-            if( *p < *q )
+            if( *p != *q )
                 return (int)(*p - *q);
         }
         pl.abs(lsgn);
@@ -282,7 +305,73 @@ struct tuple {
         pr.abs(rsgn);
         return result;
     }
+
+    // performs a modulus of lhs and rhs.
+    numb mod(numb& quot) {
+        quot = numb::ZERO;
+        while( l() > r() ) {
+            quot += numb::ONE;
+            l() = l() - r();
+        }
+        return l();
+    }
 };
+
+bool numb::operator==(const numb& rhs) const {
+    return tuple(*this, rhs).compare() == 0;
+}
+
+bool numb::operator<(const numb& rhs) const {
+    return tuple(*this, rhs).compare() < 0;
+}
+
+bool numb::operator>(const numb& rhs) const {
+    return tuple(*this, rhs).compare() > 0;
+}
+
+bool numb::operator<=(const numb& rhs) const {
+    return tuple(*this, rhs).compare() <= 0;
+}
+
+bool numb::operator>=(const numb& rhs) const {
+    return tuple(*this, rhs).compare() >= 0;
+}
+
+numb numb::operator+(const numb& rhs) const {
+    return tuple(*this, rhs).add();
+}
+
+numb numb::operator-(const numb& rhs) const {
+    numb alt = rhs;
+    alt.abs(SIGN_NEG);
+    return tuple(*this, alt).add();
+}
+
+numb numb::operator*(const numb& rhs) const {
+    return tuple(*this, rhs).mult();
+}
+
+numb numb::operator%(const numb& rhs) const {
+    numb quot;
+    return tuple(*this, rhs).mod(quot);
+}
+
+numb& numb::operator+=(const numb& rhs) {
+    *this = tuple(*this, rhs).add();
+    return *this;
+}
+
+numb& numb::operator-=(const numb& rhs) {
+    numb alt = rhs;
+    alt.abs(SIGN_NEG);
+    *this = tuple(*this, alt).add();
+    return *this;
+}
+
+numb& numb::operator*=(const numb& rhs) {
+    *this = tuple(*this, rhs).mult();
+    return *this;
+}
 
 numb numb::factorial(uint64_t n) {
     numb acc(1L);
@@ -305,15 +394,18 @@ int main() {
     std::cout << *(t.lhs.get()) << std::endl;
     std::cout << *(t.rhs.get()) << std::endl;
     std::cout << t.compare() << std::endl;
+    std::cout << "+  " << (a +   b) << std::endl;
+    std::cout << "-  " << (a -   b) << std::endl;
+    std::cout << "*  " << (a *   b) << std::endl;
+    std::cout << "=  " << (a ==  b) << std::endl;
+    std::cout << "<  " << (a <   b) << std::endl;
+    std::cout << ">  " << (a >   b) << std::endl;
+    std::cout << "<= " << (a <=  b) << std::endl;
+    std::cout << ">= " << (a >=  b) << std::endl;
 
-    numb d(34359738368);
-    numb e(4398046511104);
-    tuple u(d,e);
-    std::cout << d << std::endl;
-    std::cout << e << std::endl;
-    std::cout << u.add() << std::endl;
-    std::cout << u.mult() << std::endl;
-    std::cout << numb::factorial(5) << std::endl;
+    numb d(27L);
+    numb e(5L);
+    std::cout << "%  " << (d %   e) << std::endl;
 
     return 0;
 }
