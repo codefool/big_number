@@ -108,9 +108,20 @@ struct numb {
     numb  operator- (const numb& rhs) const;
     numb  operator* (const numb& rhs) const;
     numb  operator% (const numb& rhs) const;
+    numb  operator/ (const numb& rhs) const;
     numb& operator+=(const numb& rhs);
     numb& operator-=(const numb& rhs);
     numb& operator*=(const numb& rhs);
+
+    numb  operator+ (const int64_t& rhs) const;
+    numb  operator- (const int64_t& rhs) const;
+    numb  operator* (const int64_t& rhs) const;
+    numb  operator% (const int64_t& rhs) const;
+    numb  operator/ (const int64_t& rhs) const;
+    numb& operator+=(const int64_t& rhs);
+    numb& operator-=(const int64_t& rhs);
+    numb& operator*=(const int64_t& rhs);
+
 
     friend std::ostream& operator<<(std::ostream& os, const numb& n);
 public:
@@ -221,8 +232,6 @@ struct tuple {
         }
         bool  lsgn = pl.abs(SIGN_POS);
         bool  rsgn = pr.abs(SIGN_POS);
-        std::cout << pl << std::endl;
-        std::cout << pr << std::endl;
         const digit *p = pl.get() + pl.size() - 1;
         const digit *q = pr.get() + pl.size() - 1;
         size_t sz = pl.size();
@@ -311,7 +320,7 @@ struct tuple {
         quot = numb::ZERO;
         while( l() > r() ) {
             quot += numb::ONE;
-            l() = l() - r();
+            l() -= r();
         }
         return l();
     }
@@ -341,14 +350,26 @@ numb numb::operator+(const numb& rhs) const {
     return tuple(*this, rhs).add();
 }
 
+numb numb::operator+(const int64_t& rhs) const {
+    return tuple(*this, numb(rhs,0)).add();
+}
+
 numb numb::operator-(const numb& rhs) const {
     numb alt = rhs;
     alt.abs(SIGN_NEG);
     return tuple(*this, alt).add();
 }
 
+numb numb::operator-(const int64_t& rhs) const {
+    return tuple(*this, numb(-rhs)).add();
+}
+
 numb numb::operator*(const numb& rhs) const {
     return tuple(*this, rhs).mult();
+}
+
+numb numb::operator*(const int64_t& rhs) const {
+    return tuple(*this, numb(rhs)).mult();
 }
 
 numb numb::operator%(const numb& rhs) const {
@@ -356,8 +377,30 @@ numb numb::operator%(const numb& rhs) const {
     return tuple(*this, rhs).mod(quot);
 }
 
+numb numb::operator%(const int64_t& rhs) const {
+    numb quot;
+    return tuple(*this, numb(rhs)).mod(quot);
+}
+
+numb numb::operator/(const numb& rhs) const {
+    numb quot;
+    tuple(*this, rhs).mod(quot);
+    return quot;
+}
+
+numb numb::operator/(const int64_t& rhs) const {
+    numb quot;
+    tuple(*this, numb(rhs)).mod(quot);
+    return quot;
+}
+
 numb& numb::operator+=(const numb& rhs) {
     *this = tuple(*this, rhs).add();
+    return *this;
+}
+
+numb& numb::operator+=(const int64_t& rhs) {
+    *this = tuple(*this, numb(rhs)).add();
     return *this;
 }
 
@@ -368,13 +411,23 @@ numb& numb::operator-=(const numb& rhs) {
     return *this;
 }
 
+numb& numb::operator-=(const int64_t& rhs) {
+    *this = tuple(*this, numb(-rhs)).add();
+    return *this;
+}
+
 numb& numb::operator*=(const numb& rhs) {
     *this = tuple(*this, rhs).mult();
     return *this;
 }
 
+numb& numb::operator*=(const int64_t& rhs) {
+    *this = tuple(*this, numb(rhs)).mult();
+    return *this;
+}
+
 numb numb::factorial(uint64_t n) {
-    numb acc(1L);
+    numb acc = numb::ONE;
     for(; n > 1; --n ) {
         tuple t(acc, numb(n));
         acc = t.mult();
@@ -397,15 +450,27 @@ int main() {
     std::cout << "+  " << (a +   b) << std::endl;
     std::cout << "-  " << (a -   b) << std::endl;
     std::cout << "*  " << (a *   b) << std::endl;
-    std::cout << "=  " << (a ==  b) << std::endl;
+    std::cout << "== " << (a ==  b) << std::endl;
     std::cout << "<  " << (a <   b) << std::endl;
     std::cout << ">  " << (a >   b) << std::endl;
     std::cout << "<= " << (a <=  b) << std::endl;
     std::cout << ">= " << (a >=  b) << std::endl;
 
+    std::cout << "+  " << (a +   45L) << std::endl;
+    std::cout << "-  " << (a -   45L) << std::endl;
+    std::cout << "*  " << (a *   45L) << std::endl;
+    std::cout << "/  " << (a /   45L) << std::endl;
+    std::cout << "%  " << (a %   45L) << std::endl;
+    std::cout << "== " << (a ==  45L) << std::endl;
+    std::cout << "<  " << (a <   45L) << std::endl;
+    std::cout << ">  " << (a >   45L) << std::endl;
+    std::cout << "<= " << (a <=  45L) << std::endl;
+    std::cout << ">= " << (a >=  45L) << std::endl;
+
     numb d(27L);
     numb e(5L);
     std::cout << "%  " << (d %   e) << std::endl;
+    std::cout << "/  " << (d /   e) << std::endl;
 
     return 0;
 }
